@@ -46,7 +46,7 @@ export async function getBrandName(brandId: string | null): Promise<string | nul
   }
 }
 
-export interface RelatedLink { h1: string; slug: string; short_description?: string | null }
+export interface RelatedLink { h1: string; slug: string; short_description?: string | null; service_features?: string[] | null }
 
 export interface RelatedSections {
   services: RelatedLink[]
@@ -54,13 +54,13 @@ export interface RelatedSections {
   locations: RelatedLink[]
 }
 
-interface FoundRow { h1: string; slug: string; state: string | null; short_description: string | null }
+interface FoundRow { h1: string; slug: string; state: string | null; short_description: string | null; content_json: PageContent | null }
 
 async function findPublished(filters: { template_type: TemplateType; brand_id?: string | null; model_id?: string | null; excludeState?: string | null; sameState?: string | null }): Promise<FoundRow[]> {
   const supabase = createPublicSupabase()
   let query = supabase
     .from('generated_pages')
-    .select('h1, slug, state, short_description')
+    .select('h1, slug, state, short_description, content_json')
     .eq('status', 'published')
     .eq('template_type', filters.template_type)
 
@@ -70,7 +70,7 @@ async function findPublished(filters: { template_type: TemplateType; brand_id?: 
   if (filters.excludeState) query = query.neq('state', filters.excludeState)
 
   const { data } = await query.limit(20)
-  return data ?? []
+  return (data as unknown as FoundRow[] | null) ?? []
 }
 
 // Auto-assembles the Services / Models We Serve / Locations We Serve sections
@@ -91,7 +91,7 @@ export async function getRelatedSections(page: GeneratedPageRow, brandName: stri
     }))
   }
   function toLinks(rows: FoundRow[]): RelatedLink[] {
-    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description }))
+    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, service_features: r.content_json?.service_features ?? null }))
   }
 
   switch (page.template_type) {

@@ -75,10 +75,20 @@ function ServiceCards({ title, links }: { title: string; links: RelatedLink[] })
         <h2 className="text-xl font-extrabold text-[#0F172A] mb-6">{title}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {links.map(l => (
-            <Link key={l.slug} href={`/${l.slug}`} className="group card-premium flex flex-col p-6">
+            <Link key={l.slug} href={`/${l.slug}`} className="group card-premium flex flex-col items-center text-center p-6">
+              <div className="w-12 h-12 rounded-2xl bg-[#EEF3FB] ring-1 ring-[#DCE6F6] flex items-center justify-center mb-4 group-hover:bg-[#FDEEE4] group-hover:ring-[#F6D2BC] transition-all">
+                <svg className="w-6 h-6 text-[#4472C4] group-hover:text-[#E8601C] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
               <h3 className="text-base font-bold text-[#0F172A] mb-2 group-hover:text-[#274E96] transition-colors">{l.h1}</h3>
               {l.short_description && (
-                <p className="text-sm text-[#64748B] leading-relaxed line-clamp-3">{l.short_description}</p>
+                <p className="text-sm text-[#64748B] leading-relaxed mb-2">{l.short_description}</p>
+              )}
+              {l.service_features && l.service_features.length > 0 && (
+                <ul className="text-sm text-[#374151] space-y-1">
+                  {l.service_features.map((f, i) => <li key={i}>{f}</li>)}
+                </ul>
               )}
             </Link>
           ))}

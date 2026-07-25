@@ -7,6 +7,7 @@ import { AdminSectionCard } from '@/components/admin/ui/AdminSectionCard'
 import { AdminInput, AdminTextarea, AdminSelect, AdminLabel } from '@/components/admin/ui/AdminField'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { RichTextEditor } from '@/components/admin/RichTextEditor'
+import { ListRepeater } from '@/components/admin/ui/ListRepeater'
 import { COUNTRIES, STATES_BY_COUNTRY } from '@/lib/geo'
 import { generateSlug } from '@/lib/page-engine/slugify'
 import { TEMPLATES_REQUIRING_BRAND, TEMPLATES_REQUIRING_MODEL, type TemplateTypeValue } from '@/lib/schemas/seo-page'
@@ -253,6 +254,15 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
           value={v.content_json.services_heading ?? ''}
           onChange={e => setContent('services_heading', e.target.value)}
         />
+        <div>
+          <AdminLabel hint="Shown as a bullet list on this page's service card wherever it appears (brand/brand model pages)">Service Features</AdminLabel>
+          <ListRepeater
+            items={v.content_json.service_features ?? []}
+            onChange={items => setContent('service_features', items)}
+            placeholder="e.g. Engine diagnostics"
+            addLabel="+ Add feature"
+          />
+        </div>
         <div>
           <AdminLabel>Long Description</AdminLabel>
           <RichTextEditor value={v.complete_description} onChange={html => set('complete_description', html)} minHeight={260} />
