@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getActingUser } from '@/lib/auth-guard'
 import { sanitizeHTML, stripHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
-import { revalidatePage } from '@/lib/revalidate'
+import { revalidateGeneratedPage } from '@/lib/revalidate'
 import { nextStatusOnSave } from '@/lib/approval'
 import { SeoPageCreateSchema } from '@/lib/schemas/seo-page'
 import type { ApprovalStatus, PageContent } from '@/types'
@@ -70,11 +70,11 @@ export async function POST(req: NextRequest) {
         approval_status: nextStatusOnSave(acting.role),
         created_by: acting.id,
       })
-      .select('id, slug, status')
+      .select('id, slug, status, brand_id')
       .single()
     if (error || !data) return NextResponse.json({ error: error?.message ?? 'Create failed' }, { status: 500 })
 
-    if (data.status === 'published') await revalidatePage('generated', data.slug)
+    if (data.status === 'published') await revalidateGeneratedPage(data.slug, data.brand_id)
     await logAudit({ userId: acting.id, action: 'create', table: 'generated_pages', recordId: data.id })
     return NextResponse.json({ success: true, id: data.id }, { status: 201 })
   } catch (err) {

@@ -1,4 +1,5 @@
 import { revalidatePath } from 'next/cache'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export type RevalidateType =
   | 'blog'
@@ -24,14 +25,11 @@ export function pathsForRevalidate(type: RevalidateType, slug?: string): string[
   switch (type) {
     case 'blog': return [`/blog/${slug}`, '/blog']
     case 'generated': {
-      // slug is the full page path (e.g. "dubai/audi/oil-change"); every
-      // ancestor segment (state hub, brand hub) may also embed this page in
-      // its own auto-assembled sections, so refresh the whole chain.
-      if (!slug) return []
-      const parts = slug.split('/')
-      const out = [`/${slug}`]
-      for (let i = 1; i < parts.length; i++) out.push(`/${parts.slice(0, i).join('/')}`)
-      return out
+      // Template slugs don't nest by URL path (e.g. a brand_service page at
+      // "dubai/audi-oil-change" isn't a URL-ancestor of the "dubai/audi" brand
+      // page that embeds its card) — cross-page invalidation is brand/model
+      // scoped, not path scoped. See revalidateGeneratedPage() below.
+      return slug ? [`/${slug}`] : []
     }
     case 'static': return slug ? (STATIC_PATHS[slug] ?? [`/${slug}`]) : []
     case 'all': return ['/']
@@ -50,5 +48,26 @@ export async function revalidatePage(type: RevalidateType, slug?: string): Promi
     }
   } catch (err) {
     console.error('revalidatePage error:', err)
+  }
+}
+
+// Invalidates a saved generated_pages row's own path, plus every OTHER
+// published generated_pages row sharing the same brand_id — those are
+// exactly the pages whose auto-assembled services/models/locations sections
+// can embed this row as a RelatedLink (see getRelatedSections in
+// page-engine/content.ts). Cross-page links are brand-scoped, not
+// URL-path-scoped, so this can't be derived from the slug alone. Always
+// best-effort: never throws, never fails the save.
+export async function revalidateGeneratedPage(slug: string, brandId?: string | null): Promise<void> {
+  try {
+    revalidatePath(`/${slug}`)
+    if (!brandId) return
+    const service = createServiceClient()
+    const { data } = await service.from('generated_pages').select('slug').eq('brand_id', brandId).eq('status', 'published').neq('slug', slug)
+    for (const row of data ?? []) {
+      try { revalidatePath(`/${row.slug}`) } catch { /* best-effort per path */ }
+    }
+  } catch (err) {
+    console.error('revalidateGeneratedPage error:', err)
   }
 }

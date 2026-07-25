@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { logAudit } from '@/lib/audit'
-import { revalidatePage } from '@/lib/revalidate'
+import { revalidateGeneratedPage } from '@/lib/revalidate'
 import { assertApprover, statusForAction } from '@/lib/approval'
 import { ApproveSchema } from '@/lib/schemas/seo-page'
 
@@ -23,11 +23,11 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
       .from('generated_pages')
       .update({ approval_status: statusForAction(parsed.data.action), updated_at: new Date().toISOString() })
       .eq('id', id)
-      .select('slug')
+      .select('slug, brand_id')
       .single()
     if (error || !data) return NextResponse.json({ error: error?.message ?? 'Update failed' }, { status: 500 })
 
-    await revalidatePage('generated', data.slug)
+    await revalidateGeneratedPage(data.slug, data.brand_id)
     await logAudit({ userId: approver.id, action: 'update', table: 'generated_pages', recordId: id, changes: { approval: parsed.data.action } })
     return NextResponse.json({ success: true })
   } catch (err) {

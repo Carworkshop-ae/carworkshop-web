@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { logAudit } from '@/lib/audit'
-import { revalidatePage } from '@/lib/revalidate'
+import { revalidateGeneratedPage } from '@/lib/revalidate'
 import { assertApprover } from '@/lib/approval'
 import { BulkIdsSchema } from '@/lib/schemas/seo-page'
 
@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
       .from('generated_pages')
       .update({ approval_status: 'approved', updated_at: new Date().toISOString() })
       .in('id', parsed.data.ids)
-      .select('id, slug')
+      .select('id, slug, brand_id')
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    await Promise.all((data ?? []).map(p => revalidatePage('generated', p.slug)))
+    await Promise.all((data ?? []).map(p => revalidateGeneratedPage(p.slug, p.brand_id)))
     await Promise.all((data ?? []).map(p =>
       logAudit({ userId: approver.id, action: 'update', table: 'generated_pages', recordId: p.id, changes: { approval: 'approve' } })
     ))

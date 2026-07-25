@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getActingUser } from '@/lib/auth-guard'
 import { sanitizeHTML, stripHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
-import { revalidatePage } from '@/lib/revalidate'
+import { revalidateGeneratedPage } from '@/lib/revalidate'
 import { nextStatusOnSave } from '@/lib/approval'
 import { SeoPageUpdateSchema } from '@/lib/schemas/seo-page'
 import type { PageContent } from '@/types'
@@ -67,11 +67,11 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select('slug, status')
+      .select('slug, status, brand_id')
       .single()
     if (error || !data) return NextResponse.json({ error: error?.message ?? 'Update failed' }, { status: 500 })
 
-    await revalidatePage('generated', data.slug)
+    await revalidateGeneratedPage(data.slug, data.brand_id)
     await logAudit({ userId: acting.id, action: rest.status === 'published' ? 'publish' : 'update', table: 'generated_pages', recordId: id })
     return NextResponse.json({ success: true, slug: data.slug, status: data.status })
   } catch (err) {
@@ -87,11 +87,11 @@ export async function DELETE(_req: NextRequest, { params }: RouteContext) {
     if (!acting) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const service = createServiceClient()
-    const { data, error } = await service.from('generated_pages').delete().eq('id', id).select('slug').single()
+    const { data, error } = await service.from('generated_pages').delete().eq('id', id).select('slug, brand_id').single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     await logAudit({ userId: acting.id, action: 'delete', table: 'generated_pages', recordId: id })
-    if (data?.slug) await revalidatePage('generated', data.slug)
+    if (data?.slug) await revalidateGeneratedPage(data.slug, data.brand_id)
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('DELETE /api/admin/seo-pages/[id]:', err)
