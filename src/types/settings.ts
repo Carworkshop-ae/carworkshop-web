@@ -169,7 +169,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   call_position: 'bottom-left',
 
   nav_items: [
-    { id: '1', label: 'Services', link: '/services', has_dropdown: true, visible: true, order: 1 },
+    { id: '1', label: 'Services', link: '/dubai/services', has_dropdown: true, visible: true, order: 1 },
     { id: '2', label: 'Car Brands', link: '/brands', has_dropdown: true, visible: true, order: 2 },
     { id: '3', label: 'Locations', link: '/locations', has_dropdown: false, visible: true, order: 3 },
     { id: '4', label: 'Blog', link: '/blog', has_dropdown: false, visible: true, order: 4 },
