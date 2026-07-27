@@ -68,7 +68,7 @@ export async function getModelSlug(modelId: string | null): Promise<string | nul
   }
 }
 
-export interface RelatedLink { h1: string; slug: string; short_description?: string | null; service_features?: string[] | null; icon?: string | null }
+export interface RelatedLink { h1: string; slug: string; short_description?: string | null; icon?: string | null }
 
 export interface RelatedSections {
   services: RelatedLink[]
@@ -101,7 +101,7 @@ async function findPublished(filters: { template_type: TemplateType; brand_id?: 
 // 8-card cap applied on individual template pages.
 export async function findServicePages(state: string, brandId?: string | null, modelId?: string | null): Promise<RelatedLink[]> {
   function toLinks(rows: FoundRow[]): RelatedLink[] {
-    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, service_features: r.content_json?.service_features ?? null, icon: r.content_json?.icon ?? null }))
+    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, icon: r.content_json?.icon ?? null }))
   }
 
   if (brandId && modelId) {
@@ -136,7 +136,7 @@ export async function getRelatedSections(page: GeneratedPageRow, brandName: stri
     }))
   }
   function toLinks(rows: FoundRow[]): RelatedLink[] {
-    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, service_features: r.content_json?.service_features ?? null, icon: r.content_json?.icon ?? null }))
+    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, icon: r.content_json?.icon ?? null }))
   }
 
   switch (page.template_type) {

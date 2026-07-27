@@ -68,8 +68,6 @@ export interface PageContent {
   faqs?: Array<{ q: string; a: string }>
   /** Editable H2 above the auto-assembled services grid. Defaults to "Our Services". */
   services_heading?: string | null
-  /** Bullet-point feature list shown on this page's service card wherever it's surfaced (brand/brand_model pages). */
-  service_features?: string[] | null
   /** Icon key (see src/lib/service-icons.ts) for this page's service card. */
   icon?: string | null
 }
