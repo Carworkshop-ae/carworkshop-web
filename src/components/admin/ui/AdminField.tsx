@@ -53,13 +53,14 @@ export function AdminTextarea({ label, required, maxCount, hint, className = '',
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   required?: boolean
+  hint?: string
   options: Array<{ value: string; label: string }>
 }
 
-export function AdminSelect({ label, required, options, className = '', id, ...rest }: SelectProps) {
+export function AdminSelect({ label, required, hint, options, className = '', id, ...rest }: SelectProps) {
   return (
     <div>
-      {label && <AdminLabel htmlFor={id} required={required}>{label}</AdminLabel>}
+      {label && <AdminLabel htmlFor={id} required={required} hint={hint}>{label}</AdminLabel>}
       <div className="relative">
         <select id={id} className={`${INPUT_BASE} appearance-none pr-9 ${className}`} required={required} {...rest}>
           {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}

@@ -1,14 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getPageBySlug, getRelatedSections, getBrandName, type RelatedLink } from '@/lib/page-engine/content'
+import { getPageBySlug, getRelatedSections, getBrand, getModelSlug, type RelatedLink } from '@/lib/page-engine/content'
 import { resolveSEO, seoToMetadata } from '@/lib/seo'
 import { createPublicSupabase } from '@/lib/supabase/public'
+import { generateSlug } from '@/lib/page-engine/slugify'
 import { HeroSection, DEFAULT_HERO_STATS } from '@/components/sections/HeroSection'
 import { WhyChooseUs } from '@/components/sections/WhyChooseUs'
 import { CTABanner } from '@/components/sections/CTABanner'
+import { ServiceFeatureCard } from '@/components/sections/ServiceFeatureCard'
 
 export const revalidate = 3600
+
+const SERVICE_CARDS_LIMIT = 8
 
 interface Props { params: Promise<{ slug: string[] }> }
 
@@ -16,9 +20,10 @@ async function loadPage(slugParts: string[]) {
   const slug = slugParts.join('/')
   const page = await getPageBySlug(slug)
   if (!page) return null
-  const brandName = await getBrandName(page.brand_id)
-  const sections = await getRelatedSections(page, brandName)
-  return { page, sections, brandName }
+  const brand = await getBrand(page.brand_id)
+  const modelSlug = page.model_id ? await getModelSlug(page.model_id) : null
+  const sections = await getRelatedSections(page, brand?.name ?? null)
+  return { page, sections, brandName: brand?.name ?? null, brandSlug: brand?.slug ?? null, modelSlug }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -67,32 +72,23 @@ function LinkGrid({ title, links }: { title: string; links: RelatedLink[] }) {
   )
 }
 
-function ServiceCards({ title, links }: { title: string; links: RelatedLink[] }) {
+function ServiceCards({ title, links, viewAllHref }: { title: string; links: RelatedLink[]; viewAllHref: string | null }) {
   if (links.length === 0) return null
+  const shown = links.slice(0, SERVICE_CARDS_LIMIT)
   return (
     <section className="py-12 border-t border-hairline">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-xl font-extrabold text-[#0F172A] mb-6">{title}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {links.map(l => (
-            <Link key={l.slug} href={`/${l.slug}`} className="group card-premium flex flex-col items-center text-center p-6">
-              <div className="w-12 h-12 rounded-2xl bg-[#EEF3FB] ring-1 ring-[#DCE6F6] flex items-center justify-center mb-4 group-hover:bg-[#FDEEE4] group-hover:ring-[#F6D2BC] transition-all">
-                <svg className="w-6 h-6 text-[#4472C4] group-hover:text-[#E8601C] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-base font-bold text-[#0F172A] mb-2 group-hover:text-[#274E96] transition-colors">{l.h1}</h3>
-              {l.short_description && (
-                <p className="text-sm text-[#64748B] leading-relaxed mb-2">{l.short_description}</p>
-              )}
-              {l.service_features && l.service_features.length > 0 && (
-                <ul className="text-sm text-[#374151] space-y-1">
-                  {l.service_features.map((f, i) => <li key={i}>{f}</li>)}
-                </ul>
-              )}
-            </Link>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {shown.map(l => <ServiceFeatureCard key={l.slug} link={l} />)}
         </div>
+        {viewAllHref && (
+          <div className="text-center mt-8">
+            <Link href={viewAllHref} className="inline-flex items-center rounded-full border border-[#4472C4] px-6 py-2.5 text-sm font-semibold text-[#4472C4] hover:bg-[#EEF3FB] transition-colors">
+              View All Services
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   )
@@ -102,7 +98,7 @@ export default async function GeneratedPage({ params }: Props) {
   const { slug } = await params
   const loaded = await loadPage(slug)
   if (!loaded) notFound()
-  const { page, sections, brandName } = loaded
+  const { page, sections, brandName, brandSlug, modelSlug } = loaded
 
   const heroStats = page.starting_price
     ? [{ value: page.starting_price, label: 'Starting Price' }, ...DEFAULT_HERO_STATS.slice(1)]
@@ -111,11 +107,15 @@ export default async function GeneratedPage({ params }: Props) {
   const servicesHeading = page.content_json?.services_heading || 'Our Services'
   const modelsHeading = brandName ? `${brandName} Models We Serve` : 'Models We Serve'
 
+  const viewAllHref = page.state
+    ? `/${generateSlug(page.state)}/services${brandSlug ? `?make=${brandSlug}${modelSlug ? `&model=${modelSlug}` : ''}` : ''}`
+    : null
+
   return (
     <>
       <HeroSection h1={page.h1} subtitle={page.short_description ?? undefined} heroStats={heroStats} />
 
-      <ServiceCards title={servicesHeading} links={sections.services} />
+      <ServiceCards title={servicesHeading} links={sections.services} viewAllHref={viewAllHref} />
 
       <WhyChooseUs />
 

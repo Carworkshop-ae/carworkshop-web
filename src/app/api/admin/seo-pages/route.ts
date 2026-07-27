@@ -22,6 +22,12 @@ export async function GET(req: NextRequest) {
       .select('id, template_type, brand_id, model_id, slug, h1, meta_title, meta_keyword, status, approval_status, assignee_id, assigned_at, created_by, country, state, updated_at, generated_at')
       .order('updated_at', { ascending: false })
 
+    // seo_editor sees only pages they created or that were explicitly
+    // assigned to them — approvers still see everything.
+    if (acting.role === 'seo_editor') {
+      query = query.or(`created_by.eq.${acting.id},assignee_id.eq.${acting.id}`)
+    }
+
     if (sp.get('country')) query = query.eq('country', sp.get('country')!)
     if (sp.get('state')) query = query.eq('state', sp.get('state')!)
     if (sp.get('approval_status')) query = query.eq('approval_status', sp.get('approval_status') as ApprovalStatus)

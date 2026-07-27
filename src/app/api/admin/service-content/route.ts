@@ -19,6 +19,10 @@ export async function GET(req: NextRequest) {
       .in('template_type', [...SERVICE_TEMPLATE_TYPES])
       .order('updated_at', { ascending: false })
 
+    if (acting.role === 'seo_editor') {
+      query = query.or(`created_by.eq.${acting.id},assignee_id.eq.${acting.id}`)
+    }
+
     if (sp.get('name')) query = query.ilike('h1', `%${sp.get('name')!}%`)
 
     const { data, error } = await query.limit(2000)

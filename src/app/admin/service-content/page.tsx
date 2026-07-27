@@ -15,13 +15,19 @@ export default async function ServiceContentPage() {
   const acting = await getActingUser()
   const service = createServiceClient()
 
+  let pagesQuery = service
+    .from('generated_pages')
+    .select('id, template_type, brand_id, slug, h1, status, approval_status, assignee_id, assigned_at, created_by, country, state, updated_at, generated_at')
+    .in('template_type', SERVICE_TEMPLATE_TYPES)
+    .order('updated_at', { ascending: false })
+    .limit(2000)
+
+  if (acting?.role === 'seo_editor') {
+    pagesQuery = pagesQuery.or(`created_by.eq.${acting.id},assignee_id.eq.${acting.id}`)
+  }
+
   const [{ data: pages }, { data: brands }, { data: users }] = await Promise.all([
-    service
-      .from('generated_pages')
-      .select('id, template_type, brand_id, slug, h1, status, approval_status, assignee_id, assigned_at, created_by, country, state, updated_at, generated_at')
-      .in('template_type', SERVICE_TEMPLATE_TYPES)
-      .order('updated_at', { ascending: false })
-      .limit(2000),
+    pagesQuery,
     service.from('brands').select('id, name'),
     service.from('users').select('id, full_name'),
   ])

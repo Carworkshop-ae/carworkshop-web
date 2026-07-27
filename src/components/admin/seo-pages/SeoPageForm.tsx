@@ -8,6 +8,7 @@ import { AdminInput, AdminTextarea, AdminSelect, AdminLabel } from '@/components
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { RichTextEditor } from '@/components/admin/RichTextEditor'
 import { ListRepeater } from '@/components/admin/ui/ListRepeater'
+import { SERVICE_ICONS } from '@/lib/service-icons'
 import { COUNTRIES, STATES_BY_COUNTRY } from '@/lib/geo'
 import { generateSlug } from '@/lib/page-engine/slugify'
 import { TEMPLATES_REQUIRING_BRAND, TEMPLATES_REQUIRING_MODEL, type TemplateTypeValue } from '@/lib/schemas/seo-page'
@@ -73,6 +74,10 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
 
   const requiresBrand = TEMPLATES_REQUIRING_BRAND.includes(v.template_type)
   const requiresModel = TEMPLATES_REQUIRING_MODEL.includes(v.template_type)
+  // Templates that only ever act as a service-card source elsewhere (no hero
+  // of their own being the point) — these get a Card Icon instead of a Short
+  // Description, since the card shows icon+title+bullets, not a paragraph.
+  const isServiceCardTemplate = v.template_type === 'brand_service' || v.template_type === 'brand_model_service' || v.template_type === 'general_service'
 
   // Car Make → Model cascade
   useEffect(() => {
@@ -247,13 +252,25 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
 
       {/* Section 2: CONTENT */}
       <AdminSectionCard title="Content" headerColor="#22C55E">
-        <AdminTextarea label="Short Description" hint="Plain text — shown as the hero subtitle" value={v.short_description} onChange={e => set('short_description', e.target.value)} rows={3} maxCount={500} />
-        <AdminInput
-          label="Services Section Heading"
-          hint='Defaults to "Our Services" if left blank'
-          value={v.content_json.services_heading ?? ''}
-          onChange={e => setContent('services_heading', e.target.value)}
-        />
+        {isServiceCardTemplate ? (
+          <AdminSelect
+            label="Card Icon"
+            hint="Shown on this page's service card wherever it appears"
+            value={v.content_json.icon ?? ''}
+            onChange={e => setContent('icon', e.target.value)}
+            options={[{ value: '', label: 'Default' }, ...SERVICE_ICONS.map(i => ({ value: i.value, label: i.label }))]}
+          />
+        ) : (
+          <>
+            <AdminTextarea label="Short Description" hint="Plain text — shown as the hero subtitle" value={v.short_description} onChange={e => set('short_description', e.target.value)} rows={3} maxCount={500} />
+            <AdminInput
+              label="Services Section Heading"
+              hint='Defaults to "Our Services" if left blank'
+              value={v.content_json.services_heading ?? ''}
+              onChange={e => setContent('services_heading', e.target.value)}
+            />
+          </>
+        )}
         <div>
           <AdminLabel hint="Shown as a bullet list on this page's service card wherever it appears (brand/brand model pages)">Service Features</AdminLabel>
           <ListRepeater

@@ -46,7 +46,29 @@ export async function getBrandName(brandId: string | null): Promise<string | nul
   }
 }
 
-export interface RelatedLink { h1: string; slug: string; short_description?: string | null; service_features?: string[] | null }
+export async function getBrand(brandId: string | null): Promise<{ name: string; slug: string } | null> {
+  if (!brandId) return null
+  try {
+    const supabase = createPublicSupabase()
+    const { data } = await supabase.from('brands').select('name, slug').eq('id', brandId).maybeSingle()
+    return data ?? null
+  } catch {
+    return null
+  }
+}
+
+export async function getModelSlug(modelId: string | null): Promise<string | null> {
+  if (!modelId) return null
+  try {
+    const supabase = createPublicSupabase()
+    const { data } = await supabase.from('brand_models').select('slug').eq('id', modelId).maybeSingle()
+    return data?.slug ?? null
+  } catch {
+    return null
+  }
+}
+
+export interface RelatedLink { h1: string; slug: string; short_description?: string | null; service_features?: string[] | null; icon?: string | null }
 
 export interface RelatedSections {
   services: RelatedLink[]
@@ -69,8 +91,31 @@ async function findPublished(filters: { template_type: TemplateType; brand_id?: 
   if (filters.sameState) query = query.eq('state', filters.sameState)
   if (filters.excludeState) query = query.neq('state', filters.excludeState)
 
-  const { data } = await query.limit(20)
+  const { data } = await query.limit(100)
   return (data as unknown as FoundRow[] | null) ?? []
+}
+
+// Full (uncapped) service listing for the "View All Services" page, scoped
+// to a state and optionally a brand/model — mirrors the same brand-specific
+// → general-service fallback used by getRelatedSections, just without the
+// 8-card cap applied on individual template pages.
+export async function findServicePages(state: string, brandId?: string | null, modelId?: string | null): Promise<RelatedLink[]> {
+  function toLinks(rows: FoundRow[]): RelatedLink[] {
+    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, service_features: r.content_json?.service_features ?? null, icon: r.content_json?.icon ?? null }))
+  }
+
+  if (brandId && modelId) {
+    let rows = await findPublished({ template_type: 'brand_model_service', brand_id: brandId, model_id: modelId, sameState: state })
+    if (rows.length === 0) rows = await findPublished({ template_type: 'general_service', sameState: state })
+    return toLinks(rows)
+  }
+  if (brandId) {
+    let rows = await findPublished({ template_type: 'brand_service', brand_id: brandId, sameState: state })
+    if (rows.length === 0) rows = await findPublished({ template_type: 'general_service', sameState: state })
+    return toLinks(rows)
+  }
+  const rows = await findPublished({ template_type: 'general_service', sameState: state })
+  return toLinks(rows)
 }
 
 // Auto-assembles the Services / Models We Serve / Locations We Serve sections
@@ -91,7 +136,7 @@ export async function getRelatedSections(page: GeneratedPageRow, brandName: stri
     }))
   }
   function toLinks(rows: FoundRow[]): RelatedLink[] {
-    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, service_features: r.content_json?.service_features ?? null }))
+    return rows.map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, service_features: r.content_json?.service_features ?? null, icon: r.content_json?.icon ?? null }))
   }
 
   switch (page.template_type) {

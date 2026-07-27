@@ -12,12 +12,20 @@ export default async function SeoPagesPage() {
   const acting = await getActingUser()
   const service = createServiceClient()
 
+  let pagesQuery = service
+    .from('generated_pages')
+    .select('id, template_type, brand_id, model_id, slug, h1, meta_title, meta_keyword, status, approval_status, assignee_id, assigned_at, created_by, country, state, updated_at, generated_at')
+    .order('updated_at', { ascending: false })
+    .limit(2000)
+
+  // seo_editor sees only pages they created or that were explicitly assigned
+  // to them — approvers (admin/super_admin) still see everything.
+  if (acting?.role === 'seo_editor') {
+    pagesQuery = pagesQuery.or(`created_by.eq.${acting.id},assignee_id.eq.${acting.id}`)
+  }
+
   const [{ data: pages }, { data: brands }, { data: users }] = await Promise.all([
-    service
-      .from('generated_pages')
-      .select('id, template_type, brand_id, model_id, slug, h1, meta_title, meta_keyword, status, approval_status, assignee_id, assigned_at, created_by, country, state, updated_at, generated_at')
-      .order('updated_at', { ascending: false })
-      .limit(2000),
+    pagesQuery,
     service.from('brands').select('id, name').order('name'),
     service.from('users').select('id, full_name, role').eq('is_active', true).order('full_name'),
   ])
