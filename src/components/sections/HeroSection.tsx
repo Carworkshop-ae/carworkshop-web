@@ -54,16 +54,6 @@ export function HeroSection({
               </p>
             )}
 
-            {/* Social proof */}
-            <div className="flex items-center gap-3 mt-6">
-              <div className="flex">
-                {[0, 1, 2, 3, 4].map(i => (
-                  <Star key={i} size={18} className="text-[#F59E0B] fill-[#F59E0B]" />
-                ))}
-              </div>
-              <span className="text-sm text-[#475569]"><strong className="text-[#0F172A] font-semibold">4.9/5</strong> from 2,400+ UAE drivers</span>
-            </div>
-
             <div className="flex flex-wrap gap-3 mt-8">
               <Link
                 href={ctaHref}
