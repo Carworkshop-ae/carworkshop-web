@@ -24,8 +24,12 @@ export const SERVICE_ICONS: ServiceIconOption[] = [
   { value: 'general', label: 'General Service', icon: Wrench },
 ]
 
-const ICON_MAP = new Map(SERVICE_ICONS.map(o => [o.value, o.icon]))
+// Plain object (not a function call) so callers can do a direct member-
+// expression lookup — e.g. `SERVICE_ICON_MAP[link.icon ?? ''] ?? Wrench` —
+// which keeps the resolved component a stable, statically-analyzable
+// reference at the JSX call site (avoids react-hooks/static-components).
+export const SERVICE_ICON_MAP: Record<string, LucideIcon> = Object.fromEntries(
+  SERVICE_ICONS.map(o => [o.value, o.icon])
+)
 
-export function resolveServiceIcon(value?: string | null): LucideIcon {
-  return (value && ICON_MAP.get(value)) || Wrench
-}
+export const DEFAULT_SERVICE_ICON = Wrench

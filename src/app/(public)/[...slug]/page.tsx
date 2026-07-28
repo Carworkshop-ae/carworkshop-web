@@ -111,20 +111,38 @@ export default async function GeneratedPage({ params }: Props) {
     ? `/${generateSlug(page.state)}/services${brandSlug ? `?make=${brandSlug}${modelSlug ? `&model=${modelSlug}` : ''}` : ''}`
     : null
 
+  // brand/brand_model pages: the auto-assembled Services grid IS the page's
+  // main content, so it leads. brand_service/brand_model_service/general_service
+  // pages ARE themselves one service — their own long description is the
+  // primary content and should lead, with the Services grid demoted to a
+  // cross-sell section further down.
+  const servicesLeadFirst = page.template_type === 'brand' || page.template_type === 'brand_model'
+
+  const servicesSection = <ServiceCards title={servicesHeading} links={sections.services} viewAllHref={viewAllHref} />
+  const contentSection = page.content_json?.main_content && (
+    <section className="py-12 border-t border-hairline">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 rich-content">
+        <div dangerouslySetInnerHTML={{ __html: page.content_json.main_content }} />
+      </div>
+    </section>
+  )
+
   return (
     <>
       <HeroSection h1={page.h1} subtitle={page.short_description ?? undefined} heroStats={heroStats} />
 
-      <ServiceCards title={servicesHeading} links={sections.services} viewAllHref={viewAllHref} />
-
-      <WhyChooseUs />
-
-      {page.content_json?.main_content && (
-        <section className="py-12 border-t border-hairline">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 prose prose-slate max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: page.content_json.main_content }} />
-          </div>
-        </section>
+      {servicesLeadFirst ? (
+        <>
+          {servicesSection}
+          <WhyChooseUs />
+          {contentSection}
+        </>
+      ) : (
+        <>
+          <WhyChooseUs />
+          {contentSection}
+          {servicesSection}
+        </>
       )}
 
       {sections.models.length > 0 && <LinkGrid title={modelsHeading} links={sections.models} />}
