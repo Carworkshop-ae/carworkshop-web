@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { resolveServiceIcon } from '@/lib/service-icons'
+import { SERVICE_ICON_MAP, DEFAULT_SERVICE_ICON } from '@/lib/service-icons'
 import type { RelatedLink } from '@/lib/page-engine/content'
 
 export function ServiceFeatureCard({ link }: { link: RelatedLink }) {
-  const Icon = resolveServiceIcon(link.icon)
+  const Icon = (link.icon && SERVICE_ICON_MAP[link.icon]) || DEFAULT_SERVICE_ICON
   return (
     <Link href={`/${link.slug}`} className="group card-premium flex flex-col items-center text-center p-6">
       <div className="w-12 h-12 rounded-2xl bg-[#EEF3FB] ring-1 ring-[#DCE6F6] flex items-center justify-center mb-4 group-hover:bg-[#FDEEE4] group-hover:ring-[#F6D2BC] transition-all">

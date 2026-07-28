@@ -98,20 +98,24 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
   // has hand-edited the slug field.
   useEffect(() => {
     if (slugEdited) return
+    let cancelled = false
     const stateSlug = v.state ? generateSlug(v.state) : ''
     const brandName = brands.find(b => b.id === v.brand_id)?.name
     const modelName = models.find(m => m.id === v.model_id)?.name
     const parts = [stateSlug]
     if (requiresBrand && brandName) parts.push(generateSlug(brandName))
     if (requiresModel && modelName) parts.push(generateSlug(modelName))
-    set('slug', parts.filter(Boolean).join('/'))
+    const nextSlug = parts.filter(Boolean).join('/')
+    queueMicrotask(() => { if (!cancelled) set('slug', nextSlug) })
+    return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [v.state, v.brand_id, v.model_id, requiresBrand, requiresModel, slugEdited])
 
   // Debounced slug-availability check.
   useEffect(() => {
-    if (!v.slug) { setSlugStatus('idle'); return }
-    setSlugStatus('checking')
+    let cancelled = false
+    if (!v.slug) { queueMicrotask(() => { if (!cancelled) setSlugStatus('idle') }); return () => { cancelled = true } }
+    queueMicrotask(() => { if (!cancelled) setSlugStatus('checking') })
     const t = setTimeout(() => {
       const qs = new URLSearchParams({ slug: v.slug, ...(pageId ? { excludeId: pageId } : {}) })
       fetch(`/api/admin/seo-pages/check-slug?${qs.toString()}`)
@@ -121,7 +125,7 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
         })
         .catch(() => setSlugStatus('idle'))
     }, 400)
-    return () => clearTimeout(t)
+    return () => { cancelled = true; clearTimeout(t) }
   }, [v.slug, pageId])
 
   const canSave = useMemo(() => {
