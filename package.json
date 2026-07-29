@@ -2,6 +2,7 @@
   "name": "carworkshop",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.15.4",
   "pnpm": {
     "allowedDeprecatedVersions": {},
     "onlyBuiltDependencies": [
@@ -14,6 +15,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
