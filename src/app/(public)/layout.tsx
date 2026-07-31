@@ -7,9 +7,10 @@ import { AnnouncementBar } from '@/components/layout/AnnouncementBar'
 import { MobileCtaBar } from '@/components/layout/MobileCtaBar'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { getSettings } from '@/lib/hooks/useSettings'
+import { findFooterPages } from '@/lib/page-engine/content'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSettings()
+  const [settings, footerPages] = await Promise.all([getSettings(), findFooterPages()])
 
   const ga4 = settings.ga4_id?.trim()
   const gtm = settings.gtm_id?.trim()
@@ -34,7 +35,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <AnnouncementBar settings={settings} />
       <Header settings={settings} />
       <main className={settings.header_sticky ? 'pt-16' : ''}>{children}</main>
-      <Footer settings={settings} />
+      <Footer settings={settings} footerPages={footerPages} />
       <WhatsAppButton settings={settings} />
       <CallButton settings={settings} />
       <MobileCtaBar settings={settings} />

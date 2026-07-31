@@ -16,7 +16,10 @@ import { generateOrganizationSchema } from '@/lib/page-engine/schema'
 import { resolveSEO, seoToMetadata } from '@/lib/seo'
 import { getStaticPageSeo, getStaticPageMetaKeyword } from '@/lib/get-page-seo'
 import { getSettings } from '@/lib/hooks/useSettings'
-import type { ServiceWithPrice, FAQItem } from '@/types'
+import { findHomepageServices, findHomepageBrands, findActiveStates } from '@/lib/page-engine/content'
+import type { FAQItem } from '@/types'
+
+const DEFAULT_STATE = 'Dubai'
 
 const DEFAULT_TITLE = 'CarWorkshop.ae — Trusted Car Repair & Service in UAE'
 const DEFAULT_DESC = 'Book expert car repair, servicing, and maintenance across UAE. Certified technicians, transparent pricing, doorstep service. Get a free quote today.'
@@ -39,30 +42,28 @@ export async function generateMetadata(): Promise<Metadata> {
 interface HomeContent {
   hero?: { h1?: string; subheadline?: string; cta_primary_text?: string; cta_primary_link?: string; cta_secondary_text?: string; cta_secondary_link?: string; image_url?: string | null }
   trust_bar?: { visible?: boolean; stats?: Array<{ icon: string; value: string; label: string }> }
-  services?: { visible?: boolean; heading?: string; service_ids?: string[] }
-  brands?: { visible?: boolean; heading?: string; brand_ids?: string[] }
+  services?: { visible?: boolean; heading?: string }
+  brands?: { visible?: boolean; heading?: string }
   how_it_works?: { visible?: boolean; heading?: string; steps?: Array<{ icon?: string; title: string; description: string }> }
   why_choose_us?: { visible?: boolean; heading?: string; items?: Array<{ icon?: string; text: string }> }
   reviews?: { visible?: boolean; heading?: string; reviews?: Array<{ name: string; rating: number; service: string; text: string }> }
   blog_preview?: { visible?: boolean; heading?: string; count?: number }
-  locations?: { visible?: boolean; heading?: string; location_ids?: string[] }
+  locations?: { visible?: boolean; heading?: string }
   faq?: { visible?: boolean; heading?: string; faqs?: Array<{ q: string; a: string }> }
   cta_banner?: { visible?: boolean; headline?: string; subheadline?: string; button_text?: string; button_link?: string; bg_color?: string }
 }
 
 const vis = (s?: { visible?: boolean }) => s?.visible !== false
-const pick = <T extends { id: string }>(rows: T[], ids?: string[]) =>
-  ids && ids.length > 0 ? rows.filter(r => ids.includes(r.id)) : rows
 
 export const revalidate = 3600
 
 export default async function HomePage() {
   const supabase = await createPublicSupabase()
 
-  const [{ data: services }, { data: brands }, { data: locations }, { data: posts }, { data: page }] = await Promise.all([
-    supabase.from('services').select('*').eq('status', 'published').order('sort_order'),
-    supabase.from('brands').select('*').eq('status', 'published').order('sort_order'),
-    supabase.from('locations').select('*').eq('status', 'published').order('sort_order'),
+  const [services, brands, activeStates, { data: posts }, { data: page }] = await Promise.all([
+    findHomepageServices(DEFAULT_STATE),
+    findHomepageBrands(DEFAULT_STATE),
+    findActiveStates(),
     supabase.from('blog_posts').select('*').eq('status', 'published').order('published_at', { ascending: false }).limit(6),
     supabase.from('static_pages').select('content_json').eq('slug', 'home').eq('status', 'published').maybeSingle(),
   ])
@@ -71,10 +72,6 @@ export default async function HomePage() {
   const settings = await getSettings()
   const orgSchema = generateOrganizationSchema()
 
-  const chosenServices = pick(services ?? [], c.services?.service_ids).slice(0, 8)
-  const chosenBrands = pick(brands ?? [], c.brands?.brand_ids).slice(0, 12)
-  const chosenLocations = pick(locations ?? [], c.locations?.location_ids).slice(0, 8)
-  const servicesWithPrice: ServiceWithPrice[] = chosenServices.map(s => ({ ...s }))
   const blogPosts = (posts ?? []).slice(0, c.blog_preview?.count ?? 3)
   const faqs: FAQItem[] = (c.faq?.faqs ?? []).map(f => ({ question: f.q, answer: f.a }))
 
@@ -98,11 +95,11 @@ export default async function HomePage() {
 
       {vis(c.trust_bar) && c.trust_bar?.stats && c.trust_bar.stats.length > 0 && <TrustBar items={c.trust_bar.stats} />}
 
-      {vis(c.services) && <Reveal><ServiceCardsSection services={servicesWithPrice} title={c.services?.heading || 'Popular Car Services'} subtitle="From routine maintenance to complex repairs — we cover it all." /></Reveal>}
-      {vis(c.brands) && <Reveal><BrandsGrid brands={chosenBrands} title={c.brands?.heading || 'Brands We Service'} /></Reveal>}
+      {vis(c.services) && <Reveal><ServiceCardsSection services={services} title={c.services?.heading || 'Popular Car Services'} subtitle="From routine maintenance to complex repairs — we cover it all." /></Reveal>}
+      {vis(c.brands) && <Reveal><BrandsGrid brands={brands} title={c.brands?.heading || 'Brands We Service'} /></Reveal>}
       {vis(c.how_it_works) && <Reveal><HowItWorks heading={c.how_it_works?.heading} steps={c.how_it_works?.steps} /></Reveal>}
       {vis(c.why_choose_us) && <Reveal><WhyChooseUs heading={c.why_choose_us?.heading} items={c.why_choose_us?.items} /></Reveal>}
-      {vis(c.locations) && <Reveal><LocationsSection locations={chosenLocations} title={c.locations?.heading || 'Find Us Across UAE'} /></Reveal>}
+      {vis(c.locations) && <Reveal><LocationsSection locations={activeStates} title={c.locations?.heading || 'Find Us Across UAE'} /></Reveal>}
       {vis(c.reviews) && <Reveal><ReviewsCarousel heading={c.reviews?.heading} reviews={c.reviews?.reviews} /></Reveal>}
       {vis(c.blog_preview) && <Reveal><BlogPreview posts={blogPosts} title={c.blog_preview?.heading || 'Car Care Tips & News'} /></Reveal>}
       {vis(c.faq) && faqs.length > 0 && <Reveal><FAQSection faqs={faqs} title={c.faq?.heading || 'Common Questions'} /></Reveal>}

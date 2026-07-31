@@ -1,13 +1,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import type { Brand } from '@/types'
+import type { HomepageBrandCard } from '@/lib/page-engine/content'
 
 interface BrandsGridProps {
-  brands: Brand[]
+  brands: HomepageBrandCard[]
   title?: string
 }
 
 export function BrandsGrid({ brands, title = 'Brands We Service' }: BrandsGridProps) {
+  if (brands.length === 0) return null
   return (
     <section className="py-16 lg:py-24 bg-white" aria-labelledby="brands-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,8 +19,8 @@ export function BrandsGrid({ brands, title = 'Brands We Service' }: BrandsGridPr
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 sm:gap-4">
           {brands.map(brand => (
             <Link
-              key={brand.id}
-              href="/contact"
+              key={brand.slug}
+              href={`/${brand.slug}`}
               className="group card-premium flex flex-col items-center gap-2.5 p-5"
             >
               {brand.logo_url ? (

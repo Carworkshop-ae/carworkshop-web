@@ -58,14 +58,20 @@ export async function revalidatePage(type: RevalidateType, slug?: string): Promi
 // page-engine/content.ts). Cross-page links are brand-scoped, not
 // URL-path-scoped, so this can't be derived from the slug alone. Always
 // best-effort: never throws, never fails the save.
-export async function revalidateGeneratedPage(slug: string, brandId?: string | null): Promise<void> {
+export async function revalidateGeneratedPage(slug: string, brandId?: string | null, affectsFooter?: boolean): Promise<void> {
   try {
     revalidatePath(`/${slug}`)
-    if (!brandId) return
-    const service = createServiceClient()
-    const { data } = await service.from('generated_pages').select('slug').eq('brand_id', brandId).eq('status', 'published').neq('slug', slug)
-    for (const row of data ?? []) {
-      try { revalidatePath(`/${row.slug}`) } catch { /* best-effort per path */ }
+    if (brandId) {
+      const service = createServiceClient()
+      const { data } = await service.from('generated_pages').select('slug').eq('brand_id', brandId).eq('status', 'published').neq('slug', slug)
+      for (const row of data ?? []) {
+        try { revalidatePath(`/${row.slug}`) } catch { /* best-effort per path */ }
+      }
+    }
+    // display_in_footer is rendered by the shared (public) layout, not any
+    // single page — a per-path revalidate above won't refresh it.
+    if (affectsFooter) {
+      try { revalidatePath('/', 'layout') } catch { /* best-effort */ }
     }
   } catch (err) {
     console.error('revalidateGeneratedPage error:', err)
