@@ -2,9 +2,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, Phone, Mail } from 'lucide-react'
 import type { SiteSettings } from '@/types/settings'
+import type { RelatedLink } from '@/lib/page-engine/content'
 
 interface FooterProps {
   settings: SiteSettings
+  footerPages?: RelatedLink[]
 }
 
 // Inline brand glyphs (lucide v1 dropped brand icons). Single-path, 24×24.
@@ -17,7 +19,7 @@ const SOCIALS: Array<{ key: keyof SiteSettings; label: string; path: string }> =
   { key: 'social_twitter_url', label: 'X', path: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zM17.083 19.77h1.833L7.084 4.126H5.117z' },
 ]
 
-export function Footer({ settings }: FooterProps) {
+export function Footer({ settings, footerPages = [] }: FooterProps) {
   const quickLinks = [...settings.footer_custom_links].filter(l => l.column === 1).sort((a, b) => a.order - b.order)
   const socials = SOCIALS.map(s => ({ ...s, url: settings[s.key] as string | null })).filter(s => s.url)
   const extraBrands = (settings.footer_extra_brands ?? []).filter(b => b.label && b.link)
@@ -77,12 +79,13 @@ export function Footer({ settings }: FooterProps) {
             </div>
           )}
 
-          {/* Quick Navigation */}
-          {settings.footer_show_quick_nav && quickLinks.length > 0 && (
+          {/* Quick Navigation — hand-authored links + any SEO page marked "Display in Footer" */}
+          {settings.footer_show_quick_nav && (quickLinks.length > 0 || footerPages.length > 0) && (
             <div>
               <FooterHeading>{settings.footer_quick_nav_title}</FooterHeading>
               <ul className="mt-5 space-y-2.5 text-sm">
                 {quickLinks.map(l => <li key={l.link}><Link href={l.link} className="opacity-80 hover:opacity-100 hover:text-[#9DBBEB] transition-all">{l.label}</Link></li>)}
+                {footerPages.map(p => <li key={p.slug}><Link href={`/${p.slug}`} className="opacity-80 hover:opacity-100 hover:text-[#9DBBEB] transition-all">{p.h1}</Link></li>)}
               </ul>
             </div>
           )}

@@ -67,11 +67,11 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select('slug, status, brand_id')
+      .select('slug, status, brand_id, display_in_footer')
       .single()
     if (error || !data) return NextResponse.json({ error: error?.message ?? 'Update failed' }, { status: 500 })
 
-    await revalidateGeneratedPage(data.slug, data.brand_id)
+    await revalidateGeneratedPage(data.slug, data.brand_id, data.display_in_footer)
     await logAudit({ userId: acting.id, action: rest.status === 'published' ? 'publish' : 'update', table: 'generated_pages', recordId: id })
     return NextResponse.json({ success: true, slug: data.slug, status: data.status })
   } catch (err) {
@@ -87,11 +87,11 @@ export async function DELETE(_req: NextRequest, { params }: RouteContext) {
     if (!acting) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const service = createServiceClient()
-    const { data, error } = await service.from('generated_pages').delete().eq('id', id).select('slug, brand_id').single()
+    const { data, error } = await service.from('generated_pages').delete().eq('id', id).select('slug, brand_id, display_in_footer').single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     await logAudit({ userId: acting.id, action: 'delete', table: 'generated_pages', recordId: id })
-    if (data?.slug) await revalidateGeneratedPage(data.slug, data.brand_id)
+    if (data?.slug) await revalidateGeneratedPage(data.slug, data.brand_id, data.display_in_footer)
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('DELETE /api/admin/seo-pages/[id]:', err)

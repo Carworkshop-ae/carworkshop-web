@@ -8,14 +8,13 @@ import { RichTextEditor } from '@/components/admin/RichTextEditor'
 import { AdminInput, AdminTextarea, AdminLabel } from '@/components/admin/ui/AdminField'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { AdminSectionCard } from '@/components/admin/ui/AdminSectionCard'
-import { Repeater, MultiSelect, inputCls } from '@/components/admin/ui/Repeater'
+import { Repeater, inputCls } from '@/components/admin/ui/Repeater'
 import { EditorChrome, StatusCard, SeoCard, InfoCard } from '@/components/admin/EditorChrome'
 import { EntitySeoTab } from '@/components/admin/EntitySeoTab'
 import { EditorSkeleton } from '@/components/admin/ui/EditorSkeleton'
 import type { SeoJson } from '@/lib/schemas/seo'
 
 type Status = 'draft' | 'published' | 'archived'
-interface NamedRow { id: string; name: string }
 interface FAQ { q: string; a: string }
 interface Stat { icon: string; value: string; label: string }
 interface Step { icon: string; title: string; description: string }
@@ -25,13 +24,13 @@ interface Review { name: string; rating: number; service: string; text: string }
 interface HomeContent {
   hero: { h1: string; subheadline: string; cta_primary_text: string; cta_primary_link: string; cta_secondary_text: string; cta_secondary_link: string; image_url: string | null }
   trust_bar: { visible: boolean; stats: Stat[] }
-  services: { visible: boolean; heading: string; service_ids: string[] }
-  brands: { visible: boolean; heading: string; brand_ids: string[] }
+  services: { visible: boolean; heading: string }
+  brands: { visible: boolean; heading: string }
   how_it_works: { visible: boolean; heading: string; steps: Step[] }
   why_choose_us: { visible: boolean; heading: string; items: USP[] }
   reviews: { visible: boolean; heading: string; reviews: Review[] }
   blog_preview: { visible: boolean; heading: string; count: number }
-  locations: { visible: boolean; heading: string; location_ids: string[] }
+  locations: { visible: boolean; heading: string }
   faq: { visible: boolean; heading: string; faqs: FAQ[] }
   cta_banner: { visible: boolean; headline: string; subheadline: string; button_text: string; button_link: string; bg_color: string }
 }
@@ -44,8 +43,8 @@ const DEFAULTS: HomeContent = {
     { icon: '🔧', value: 'Certified', label: 'Technicians' },
     { icon: '📦', value: 'Free', label: 'Pickup & Delivery' },
   ] },
-  services: { visible: true, heading: 'Our Most Popular Services', service_ids: [] },
-  brands: { visible: true, heading: 'Trusted Car Brands We Service', brand_ids: [] },
+  services: { visible: true, heading: 'Our Most Popular Services' },
+  brands: { visible: true, heading: 'Trusted Car Brands We Service' },
   how_it_works: { visible: true, heading: 'Car Maintenance, Made Easy', steps: [
     { icon: '🔍', title: 'Book Online', description: 'Choose your service and car details.' },
     { icon: '🚗', title: 'We Collect', description: 'Free pickup from your home or office.' },
@@ -59,7 +58,7 @@ const DEFAULTS: HomeContent = {
   ] },
   reviews: { visible: true, heading: 'What Our Customers Say', reviews: [] },
   blog_preview: { visible: true, heading: 'Latest from Our Blog', count: 3 },
-  locations: { visible: true, heading: 'Areas We Serve in UAE', location_ids: [] },
+  locations: { visible: true, heading: 'Areas We Serve in UAE' },
   faq: { visible: true, heading: 'Common Questions', faqs: [] },
   cta_banner: { visible: true, headline: 'Book Your Car Service Today', subheadline: 'Free pickup & delivery across UAE', button_text: 'Book Now', button_link: '/contact', bg_color: '#4472C4' },
 }
@@ -94,17 +93,12 @@ export default function HomeEditor() {
   const [metaKeyword, setMetaKeyword] = useState('')
   const [h3Text, setH3Text] = useState('')
   const [shortDescription, setShortDescription] = useState('')
-  const [services, setServices] = useState<NamedRow[]>([])
-  const [brands, setBrands] = useState<NamedRow[]>([])
-  const [locations, setLocations] = useState<NamedRow[]>([])
 
   useEffect(() => {
     let cancelled = false
     void (async () => {
       try {
-        const [pageRes, svc, br, loc] = await Promise.all([
-          fetch('/api/admin/pages/static/home'), fetch('/api/admin/services'), fetch('/api/admin/brands'), fetch('/api/admin/locations'),
-        ])
+        const pageRes = await fetch('/api/admin/pages/static/home')
         if (cancelled) return
         if (pageRes.ok) {
           const d = await pageRes.json() as { page: {
@@ -114,9 +108,6 @@ export default function HomeEditor() {
           setC(merge(d.page.content_json)); setStatus(d.page.status); setSeoTitle(d.page.seo_title ?? ''); setSeoDesc(d.page.seo_description ?? ''); setSeoJson(d.page.seo_json ?? {})
           setSubTitle(d.page.sub_title ?? ''); setMetaKeyword(d.page.meta_keyword ?? ''); setH3Text(d.page.h3_text ?? ''); setShortDescription(d.page.short_description ?? '')
         }
-        if (svc.ok) { const d = await svc.json() as { services: NamedRow[] }; setServices(d.services ?? []) }
-        if (br.ok) { const d = await br.json() as { brands: NamedRow[] }; setBrands(d.brands ?? []) }
-        if (loc.ok) { const d = await loc.json() as { locations: NamedRow[] }; setLocations(d.locations ?? []) }
       } catch { /* ignore */ } finally { if (!cancelled) setLoading(false) }
     })()
     return () => { cancelled = true }
@@ -202,13 +193,13 @@ export default function HomeEditor() {
         {/* 3 Services */}
         <AdminSectionCard title="Popular Services" visible={c.services.visible} onVisibleChange={v => patch('services', { visible: v })}>
           <AdminInput label="Section Heading" value={c.services.heading} onChange={e => patch('services', { heading: e.target.value })} />
-          <MultiSelect label="Services to show" options={services} selected={c.services.service_ids} onChange={ids => patch('services', { service_ids: ids })} />
+          <p className="text-xs text-zinc-400">Auto-pulls the latest published General Service SEO pages for Dubai — create/edit them under SEO Pages.</p>
         </AdminSectionCard>
 
         {/* 4 Brands */}
         <AdminSectionCard title="Top Brands" visible={c.brands.visible} onVisibleChange={v => patch('brands', { visible: v })}>
           <AdminInput label="Section Heading" value={c.brands.heading} onChange={e => patch('brands', { heading: e.target.value })} />
-          <MultiSelect label="Brands to show" options={brands} selected={c.brands.brand_ids} onChange={ids => patch('brands', { brand_ids: ids })} />
+          <p className="text-xs text-zinc-400">Auto-pulls the latest published Brand SEO pages for Dubai — create/edit them under SEO Pages.</p>
         </AdminSectionCard>
 
         {/* 5 How It Works */}
@@ -276,7 +267,7 @@ export default function HomeEditor() {
         {/* 9 Locations */}
         <AdminSectionCard title="Locations" visible={c.locations.visible} onVisibleChange={v => patch('locations', { visible: v })}>
           <AdminInput label="Section Heading" value={c.locations.heading} onChange={e => patch('locations', { heading: e.target.value })} />
-          <MultiSelect label="Locations to show" options={locations} selected={c.locations.location_ids} onChange={ids => patch('locations', { location_ids: ids })} />
+          <p className="text-xs text-zinc-400">Auto-pulls every state with at least one published SEO page.</p>
         </AdminSectionCard>
 
         {/* 10 FAQ */}

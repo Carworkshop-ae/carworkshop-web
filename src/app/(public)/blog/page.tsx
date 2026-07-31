@@ -54,11 +54,13 @@ export default async function BlogPage() {
           <p className="text-center text-[#6B7280] py-20">No posts published yet. Check back soon.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map(post => (
+            {posts.map(post => {
+              const image = post.image_webp_url || post.image_png_url || post.featured_image
+              return (
               <Card key={post.id} padding="none" hover className="overflow-hidden flex flex-col">
-                {post.featured_image && (
+                {image && (
                   <div className="relative h-48 bg-[#F3F4F6]">
-                    <Image src={post.featured_image} alt={post.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                    <Image src={image} alt={post.image_alt || post.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                   </div>
                 )}
                 <div className="p-5 flex flex-col flex-1">
@@ -80,7 +82,8 @@ export default async function BlogPage() {
                   </div>
                 </div>
               </Card>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

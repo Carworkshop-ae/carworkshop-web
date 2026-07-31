@@ -68,7 +68,7 @@ export async function getModelSlug(modelId: string | null): Promise<string | nul
   }
 }
 
-export interface RelatedLink { h1: string; slug: string; short_description?: string | null; icon?: string | null }
+export interface RelatedLink { h1: string; slug: string; short_description?: string | null; icon?: string | null; starting_price?: string | null }
 
 export interface RelatedSections {
   services: RelatedLink[]
@@ -116,6 +116,92 @@ export async function findServicePages(state: string, brandId?: string | null, m
   }
   const rows = await findPublished({ template_type: 'general_service', sameState: state })
   return toLinks(rows)
+}
+
+// Brand-directory listing (mirrors findServicePages) for /[state]/brands.
+export async function findBrandPages(state: string): Promise<RelatedLink[]> {
+  const rows = await findPublished({ template_type: 'brand', sameState: state })
+  return rows.map(r => ({ h1: r.h1, slug: r.slug }))
+}
+
+// Distinct states with at least one published page — backs the /locations
+// directory and the "Areas We Serve" homepage section. Computed from the
+// same table everything else reads, no separate locations table involved.
+export async function findActiveStates(): Promise<string[]> {
+  try {
+    const supabase = createPublicSupabase()
+    const { data } = await supabase
+      .from('generated_pages')
+      .select('state')
+      .eq('status', 'published')
+      .not('state', 'is', null)
+      .limit(1000)
+    const states = new Set((data ?? []).map(r => r.state).filter((s): s is string => !!s))
+    return [...states].sort()
+  } catch {
+    return []
+  }
+}
+
+// Homepage "Popular Services" — top published general_service pages for a
+// default state (Dubai). Replaces the old empty `services` catalog table.
+export async function findHomepageServices(state: string, limit = 8): Promise<RelatedLink[]> {
+  try {
+    const supabase = createPublicSupabase()
+    const { data } = await supabase
+      .from('generated_pages')
+      .select('h1, slug, short_description, starting_price, content_json')
+      .eq('status', 'published')
+      .eq('template_type', 'general_service')
+      .eq('state', state)
+      .limit(limit)
+    return (data ?? []).map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, starting_price: r.starting_price, icon: (r.content_json as PageContent | null)?.icon ?? null }))
+  } catch {
+    return []
+  }
+}
+
+export interface HomepageBrandCard { name: string; slug: string; logo_url: string | null }
+
+// Homepage "Trusted Car Brands" — top published brand pages for a default
+// state (Dubai), joined with the `brands` table for the logo/display name.
+// Replaces the old empty `brands`-catalog-table-driven read; linking now
+// comes from real generated_pages rows, not /contact.
+export async function findHomepageBrands(state: string, limit = 12): Promise<HomepageBrandCard[]> {
+  try {
+    const supabase = createPublicSupabase()
+    const { data } = await supabase
+      .from('generated_pages')
+      .select('slug, brand_id, brands ( name, logo_url )')
+      .eq('status', 'published')
+      .eq('template_type', 'brand')
+      .eq('state', state)
+      .not('brand_id', 'is', null)
+      .limit(limit)
+    const rows = (data as unknown as Array<{ slug: string; brands: { name: string; logo_url: string | null } | null }>) ?? []
+    return rows
+      .filter((r): r is { slug: string; brands: { name: string; logo_url: string | null } } => !!r.brands)
+      .map(r => ({ name: r.brands.name, slug: r.slug, logo_url: r.brands.logo_url }))
+  } catch {
+    return []
+  }
+}
+
+// Footer "Display in Footer" pages — the only consumer of that flag.
+export async function findFooterPages(): Promise<RelatedLink[]> {
+  try {
+    const supabase = createPublicSupabase()
+    const { data } = await supabase
+      .from('generated_pages')
+      .select('h1, slug')
+      .eq('status', 'published')
+      .eq('display_in_footer', true)
+      .order('h1', { ascending: true })
+      .limit(50)
+    return data ?? []
+  } catch {
+    return []
+  }
 }
 
 // Auto-assembles the Services / Models We Serve / Locations We Serve sections

@@ -16,7 +16,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createPublicSupabase()
-  const { data: post } = await supabase.from('blog_posts').select('title, excerpt, seo_title, seo_description, featured_image, seo_json').eq('slug', slug).eq('status', 'published').single()
+  const { data: post } = await supabase.from('blog_posts').select('title, excerpt, seo_title, seo_description, featured_image, image_webp_url, image_png_url, seo_json').eq('slug', slug).eq('status', 'published').single()
 
   if (!post) return { title: 'Post Not Found' }
 
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: post.seo_title ?? `${post.title} | CarWorkshop.ae`,
     description: post.seo_description ?? post.excerpt ?? '',
     url,
-    ogImage: post.featured_image,
+    ogImage: post.image_webp_url || post.image_png_url || post.featured_image,
   })
   const meta = seoToMetadata(seo, url)
   return { ...meta, openGraph: { ...meta.openGraph, type: 'article' } }
@@ -50,6 +50,9 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   if (!post) notFound()
 
+  const featuredImage = post.image_webp_url || post.image_png_url || post.featured_image
+  const featuredImageAlt = post.image_alt || post.image_title || post.title
+
   let authorName = settings.default_author_name || 'CarWorkshop Team'
   if (post.author_id) {
     const { data: author } = await supabase.from('users').select('full_name').eq('id', post.author_id).maybeSingle()
@@ -61,7 +64,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     '@type': 'Article',
     headline: post.title,
     description: post.excerpt,
-    image: post.featured_image,
+    image: featuredImage,
     datePublished: post.published_at,
     dateModified: post.updated_at,
     publisher: {
@@ -98,9 +101,9 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </header>
 
-        {post.featured_image && (
+        {featuredImage && (
           <div className="relative w-full h-64 sm:h-80 rounded-lg overflow-hidden mb-8">
-            <Image src={post.featured_image} alt={post.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
+            <Image src={featuredImage} alt={featuredImageAlt} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
           </div>
         )}
 

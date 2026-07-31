@@ -76,11 +76,11 @@ export async function POST(req: NextRequest) {
         approval_status: nextStatusOnSave(acting.role),
         created_by: acting.id,
       })
-      .select('id, slug, status, brand_id')
+      .select('id, slug, status, brand_id, display_in_footer')
       .single()
     if (error || !data) return NextResponse.json({ error: error?.message ?? 'Create failed' }, { status: 500 })
 
-    if (data.status === 'published') await revalidateGeneratedPage(data.slug, data.brand_id)
+    if (data.status === 'published') await revalidateGeneratedPage(data.slug, data.brand_id, data.display_in_footer)
     await logAudit({ userId: acting.id, action: 'create', table: 'generated_pages', recordId: data.id })
     return NextResponse.json({ success: true, id: data.id }, { status: 201 })
   } catch (err) {
