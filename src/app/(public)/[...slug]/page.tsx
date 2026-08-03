@@ -5,7 +5,8 @@ import { getPageBySlug, getRelatedSections, getBrand, getModelSlug, type Related
 import { resolveSEO, seoToMetadata } from '@/lib/seo'
 import { createPublicSupabase } from '@/lib/supabase/public'
 import { generateSlug } from '@/lib/page-engine/slugify'
-import { HeroSection, DEFAULT_HERO_STATS } from '@/components/sections/HeroSection'
+import { HeroSection } from '@/components/sections/HeroSection'
+import { HeroLeadForm } from '@/components/sections/HeroLeadForm'
 import { WhyChooseUs } from '@/components/sections/WhyChooseUs'
 import { CTABanner } from '@/components/sections/CTABanner'
 import { ServiceFeatureCard } from '@/components/sections/ServiceFeatureCard'
@@ -100,10 +101,6 @@ export default async function GeneratedPage({ params }: Props) {
   if (!loaded) notFound()
   const { page, sections, brandName, brandSlug, modelSlug } = loaded
 
-  const heroStats = page.starting_price
-    ? [{ value: page.starting_price, label: 'Starting Price' }, ...DEFAULT_HERO_STATS.slice(1)]
-    : undefined
-
   const servicesHeading = page.content_json?.services_heading || 'Our Services'
   const modelsHeading = brandName ? `${brandName} Models We Serve` : 'Models We Serve'
 
@@ -129,7 +126,7 @@ export default async function GeneratedPage({ params }: Props) {
 
   return (
     <>
-      <HeroSection h1={page.h1} subtitle={page.short_description ?? undefined} heroStats={heroStats} />
+      <HeroSection h1={page.h1} subtitle={page.short_description ?? undefined} rightSlot={<HeroLeadForm />} />
 
       {servicesLeadFirst ? (
         <>
