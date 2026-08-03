@@ -136,6 +136,18 @@ export interface FooterBrandLink { name: string; slug: string }
 export async function findDubaiBrandsForFooter(): Promise<FooterBrandLink[]> {
   try {
     const supabase = createPublicSupabase()
+    const { data: brandsData } = await supabase
+      .from('brands')
+      .select('name, slug')
+      .order('name', { ascending: true })
+
+    if (brandsData && brandsData.length > 0) {
+      return brandsData.map(b => {
+        const cleanBrandSlug = b.slug.replace(/^dubai\//, '').replace(/^\//, '')
+        return { name: b.name, slug: `dubai/${cleanBrandSlug}` }
+      })
+    }
+
     const { data } = await supabase
       .from('generated_pages')
       .select('slug, brand_id, brands ( name )')
@@ -147,7 +159,10 @@ export async function findDubaiBrandsForFooter(): Promise<FooterBrandLink[]> {
     const rows = (data as unknown as Array<{ slug: string; brands: { name: string } | null }>) ?? []
     return rows
       .filter((r): r is { slug: string; brands: { name: string } } => !!r.brands)
-      .map(r => ({ name: r.brands.name, slug: r.slug }))
+      .map(r => {
+        const cleanSlug = r.slug.replace(/^\//, '')
+        return { name: r.brands.name, slug: cleanSlug }
+      })
       .sort((a, b) => a.name.localeCompare(b.name))
   } catch {
     return []

@@ -18,7 +18,12 @@ export default async function CatchAllLayout({ children, params }: Props) {
   const page = await getPageBySlug(slug.join('/'))
   const settings = await getSettings()
 
-  if (page?.template_type === 'brand') {
+  const isDubaiBrandPage =
+    slug.length === 2 &&
+    slug[0].toLowerCase() === 'dubai' &&
+    (!page || page.template_type === 'brand')
+
+  if (isDubaiBrandPage) {
     const brands = await findDubaiBrandsForFooter()
     return (
       <>
