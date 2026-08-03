@@ -125,7 +125,7 @@ function SettingsInner() {
       {activeTab === 'header' && <HeaderTab settings={settings} set={set} toggle={toggle} onSaveHeader={() => saveKeys(['header_logo_url', 'header_phone_number', 'header_phone_visible', 'header_whatsapp_visible', 'header_cta_text', 'header_cta_link', 'header_cta_visible', 'header_background_color', 'header_text_color', 'header_sticky'])} onSaveNav={() => saveKeys(['nav_items'])} />}
       {activeTab === 'footer' && <FooterTab settings={settings} set={set} toggle={toggle} onSave={() => saveKeys(['footer_logo_url', 'footer_tagline', 'footer_background_color', 'footer_text_color', 'footer_copyright_text', 'footer_show_services_column', 'footer_show_brands_column', 'footer_show_locations_column', 'footer_custom_links', 'footer_show_business_info', 'footer_show_quick_nav', 'footer_show_social', 'footer_business_title', 'footer_business_address', 'footer_business_phone', 'footer_business_phone2', 'footer_business_email', 'footer_quick_nav_title', 'footer_social_title', 'footer_extra_brands'])} />}
       {activeTab === 'contact-buttons' && <ContactButtonsTab settings={settings} set={set} toggle={toggle} onSave={() => saveKeys(['whatsapp_enabled', 'whatsapp_number', 'whatsapp_message', 'whatsapp_position', 'call_enabled', 'call_number', 'call_position'])} />}
-      {activeTab === 'social' && <SocialTab settings={settings} set={set} onSave={() => saveKeys(['social_instagram_url', 'social_facebook_url', 'social_linkedin_url', 'social_youtube_url', 'social_tiktok_url', 'social_twitter_url'])} />}
+      {activeTab === 'social' && <SocialTab settings={settings} set={set} onSave={() => saveKeys(['social_instagram_url', 'social_facebook_url', 'social_linkedin_url', 'social_youtube_url', 'social_tiktok_url', 'social_twitter_url', 'social_google_business_url'])} />}
       {activeTab === 'announcement' && <AnnouncementTab settings={settings} set={set} toggle={toggle} onSave={() => saveKeys(['announcement_bar_enabled', 'announcement_bar_text', 'announcement_bar_bg_color', 'announcement_bar_text_color', 'announcement_bar_link'])} />}
       {activeTab === 'seo' && <SeoTab settings={settings} set={set} onSave={() => saveKeys(['ga4_id', 'gtm_id', 'gsc_meta', 'default_meta_title', 'default_meta_description', 'default_og_image'])} />}
       {activeTab === 'email' && <EmailTab settings={settings} set={set} onSave={saveEmail} onTest={sendTestEmail} />}
@@ -452,6 +452,7 @@ function SocialTab({ settings, set, onSave }: { settings: SiteSettings; set: Set
     { key: 'social_instagram_url', label: 'Instagram URL' }, { key: 'social_facebook_url', label: 'Facebook URL' },
     { key: 'social_linkedin_url', label: 'LinkedIn URL' }, { key: 'social_youtube_url', label: 'YouTube URL' },
     { key: 'social_tiktok_url', label: 'TikTok URL' }, { key: 'social_twitter_url', label: 'Twitter / X URL' },
+    { key: 'social_google_business_url', label: 'Google Business URL' },
   ]
   return (
     <div className="max-w-2xl">
