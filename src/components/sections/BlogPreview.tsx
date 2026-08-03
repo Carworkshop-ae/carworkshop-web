@@ -23,13 +23,15 @@ export function BlogPreview({ posts, title = 'Car Care Tips & News' }: BlogPrevi
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-          {posts.slice(0, 3).map(post => (
+          {posts.slice(0, 3).map(post => {
+            const image = post.image_webp_url || post.image_png_url || post.featured_image
+            return (
             <article key={post.id} className="group card-premium overflow-hidden flex flex-col">
               <Link href={`/blog/${post.slug}`} className="relative h-48 bg-[#EEF1F5] block overflow-hidden">
-                {post.featured_image ? (
+                {image ? (
                   <Image
-                    src={post.featured_image}
-                    alt={post.title}
+                    src={image}
+                    alt={post.image_alt || post.title}
                     fill
                     className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -60,7 +62,8 @@ export function BlogPreview({ posts, title = 'Car Care Tips & News' }: BlogPrevi
                 </div>
               </div>
             </article>
-          ))}
+            )
+          })}
         </div>
 
         <div className="text-center mt-10 sm:hidden">

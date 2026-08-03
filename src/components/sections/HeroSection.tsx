@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { Star, ShieldCheck, Truck, ArrowRight } from 'lucide-react'
 
 interface HeroStat { value: string; label: string }
@@ -8,8 +9,10 @@ interface HeroSectionProps {
   ctaLabel?: string
   ctaHref?: string
   badge?: string
-  /** Decorative stat card cells. [0] = headline, [1..3] = grid. */
+  /** Decorative stat card cells. [0] = headline, [1..3] = grid. Ignored when rightSlot is set. */
   heroStats?: HeroStat[]
+  /** Replaces the default stat card in the right column (e.g. a lead form). */
+  rightSlot?: ReactNode
 }
 
 export const DEFAULT_HERO_STATS: HeroStat[] = [
@@ -29,6 +32,7 @@ export function HeroSection({
   ctaHref = '/contact',
   badge,
   heroStats,
+  rightSlot,
 }: HeroSectionProps) {
   const stats = heroStats && heroStats.length >= 4 ? heroStats : DEFAULT_HERO_STATS
   return (
@@ -71,32 +75,34 @@ export function HeroSection({
             </ul>
           </div>
 
-          {/* Decorative visual (CSS only, no assets) */}
+          {/* Right column: custom slot (e.g. lead form) or the default decorative stat card */}
           <div className="hidden lg:block lg:col-span-5">
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-primary opacity-10 blur-3xl rounded-[3rem]" aria-hidden="true" />
-              <div className="relative card-premium p-7 rounded-3xl">
-                <div className="bg-gradient-primary rounded-2xl p-6 text-white">
-                  <p className="text-sm/relaxed opacity-90">{stats[0].label}</p>
-                  <p className="text-2xl font-extrabold mt-1">{stats[0].value}</p>
-                  <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-                    {stats.slice(1, 4).map(s => (
-                      <div key={s.label} className="rounded-xl bg-white/10 backdrop-blur px-2 py-3">
-                        <p className="text-lg font-bold leading-none">{s.value}</p>
-                        <p className="text-[11px] opacity-80 mt-1">{s.label}</p>
-                      </div>
-                    ))}
+            {rightSlot ?? (
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-primary opacity-10 blur-3xl rounded-[3rem]" aria-hidden="true" />
+                <div className="relative card-premium p-7 rounded-3xl">
+                  <div className="bg-gradient-primary rounded-2xl p-6 text-white">
+                    <p className="text-sm/relaxed opacity-90">{stats[0].label}</p>
+                    <p className="text-2xl font-extrabold mt-1">{stats[0].value}</p>
+                    <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+                      {stats.slice(1, 4).map(s => (
+                        <div key={s.label} className="rounded-xl bg-white/10 backdrop-blur px-2 py-3">
+                          <p className="text-lg font-bold leading-none">{s.value}</p>
+                          <p className="text-[11px] opacity-80 mt-1">{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="mt-5 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-orange flex items-center justify-center text-white font-bold">✓</div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#0F172A]">Transparent fixed pricing</p>
-                    <p className="text-xs text-[#64748B]">No surprises. Pay after service.</p>
+                  <div className="mt-5 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-orange flex items-center justify-center text-white font-bold">✓</div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#0F172A]">Transparent fixed pricing</p>
+                      <p className="text-xs text-[#64748B]">No surprises. Pay after service.</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

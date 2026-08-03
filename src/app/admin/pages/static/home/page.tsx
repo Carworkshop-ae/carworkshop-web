@@ -25,7 +25,6 @@ interface HomeContent {
   hero: { h1: string; subheadline: string; cta_primary_text: string; cta_primary_link: string; cta_secondary_text: string; cta_secondary_link: string; image_url: string | null }
   trust_bar: { visible: boolean; stats: Stat[] }
   services: { visible: boolean; heading: string }
-  brands: { visible: boolean; heading: string }
   how_it_works: { visible: boolean; heading: string; steps: Step[] }
   why_choose_us: { visible: boolean; heading: string; items: USP[] }
   reviews: { visible: boolean; heading: string; reviews: Review[] }
@@ -44,7 +43,6 @@ const DEFAULTS: HomeContent = {
     { icon: '📦', value: 'Free', label: 'Pickup & Delivery' },
   ] },
   services: { visible: true, heading: 'Our Most Popular Services' },
-  brands: { visible: true, heading: 'Trusted Car Brands We Service' },
   how_it_works: { visible: true, heading: 'Car Maintenance, Made Easy', steps: [
     { icon: '🔍', title: 'Book Online', description: 'Choose your service and car details.' },
     { icon: '🚗', title: 'We Collect', description: 'Free pickup from your home or office.' },
@@ -69,7 +67,6 @@ function merge(saved: Partial<HomeContent> | null): HomeContent {
     hero: { ...DEFAULTS.hero, ...c.hero },
     trust_bar: { ...DEFAULTS.trust_bar, ...c.trust_bar },
     services: { ...DEFAULTS.services, ...c.services },
-    brands: { ...DEFAULTS.brands, ...c.brands },
     how_it_works: { ...DEFAULTS.how_it_works, ...c.how_it_works },
     why_choose_us: { ...DEFAULTS.why_choose_us, ...c.why_choose_us },
     reviews: { ...DEFAULTS.reviews, ...c.reviews },
@@ -194,12 +191,6 @@ export default function HomeEditor() {
         <AdminSectionCard title="Popular Services" visible={c.services.visible} onVisibleChange={v => patch('services', { visible: v })}>
           <AdminInput label="Section Heading" value={c.services.heading} onChange={e => patch('services', { heading: e.target.value })} />
           <p className="text-xs text-zinc-400">Auto-pulls the latest published General Service SEO pages for Dubai — create/edit them under SEO Pages.</p>
-        </AdminSectionCard>
-
-        {/* 4 Brands */}
-        <AdminSectionCard title="Top Brands" visible={c.brands.visible} onVisibleChange={v => patch('brands', { visible: v })}>
-          <AdminInput label="Section Heading" value={c.brands.heading} onChange={e => patch('brands', { heading: e.target.value })} />
-          <p className="text-xs text-zinc-400">Auto-pulls the latest published Brand SEO pages for Dubai — create/edit them under SEO Pages.</p>
         </AdminSectionCard>
 
         {/* 5 How It Works */}
