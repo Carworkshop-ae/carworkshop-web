@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { createPublicSupabase } from '@/lib/supabase/public'
 import { HeroSection } from '@/components/sections/HeroSection'
+import { HeroLeadForm } from '@/components/sections/HeroLeadForm'
 import { TrustBar } from '@/components/sections/TrustBar'
 import { ServiceCardsSection } from '@/components/sections/ServiceCardsSection'
-import { BrandsGrid } from '@/components/sections/BrandsGrid'
 import { HowItWorks } from '@/components/sections/HowItWorks'
 import { WhyChooseUs } from '@/components/sections/WhyChooseUs'
 import { ReviewsCarousel } from '@/components/sections/ReviewsCarousel'
@@ -16,7 +16,7 @@ import { generateOrganizationSchema } from '@/lib/page-engine/schema'
 import { resolveSEO, seoToMetadata } from '@/lib/seo'
 import { getStaticPageSeo, getStaticPageMetaKeyword } from '@/lib/get-page-seo'
 import { getSettings } from '@/lib/hooks/useSettings'
-import { findHomepageServices, findHomepageBrands, findActiveStates } from '@/lib/page-engine/content'
+import { findHomepageServices, findActiveStates } from '@/lib/page-engine/content'
 import type { FAQItem } from '@/types'
 
 const DEFAULT_STATE = 'Dubai'
@@ -43,7 +43,6 @@ interface HomeContent {
   hero?: { h1?: string; subheadline?: string; cta_primary_text?: string; cta_primary_link?: string; cta_secondary_text?: string; cta_secondary_link?: string; image_url?: string | null }
   trust_bar?: { visible?: boolean; stats?: Array<{ icon: string; value: string; label: string }> }
   services?: { visible?: boolean; heading?: string }
-  brands?: { visible?: boolean; heading?: string }
   how_it_works?: { visible?: boolean; heading?: string; steps?: Array<{ icon?: string; title: string; description: string }> }
   why_choose_us?: { visible?: boolean; heading?: string; items?: Array<{ icon?: string; text: string }> }
   reviews?: { visible?: boolean; heading?: string; reviews?: Array<{ name: string; rating: number; service: string; text: string }> }
@@ -60,9 +59,8 @@ export const revalidate = 3600
 export default async function HomePage() {
   const supabase = await createPublicSupabase()
 
-  const [services, brands, activeStates, { data: posts }, { data: page }] = await Promise.all([
+  const [services, activeStates, { data: posts }, { data: page }] = await Promise.all([
     findHomepageServices(DEFAULT_STATE),
-    findHomepageBrands(DEFAULT_STATE),
     findActiveStates(),
     supabase.from('blog_posts').select('*').eq('status', 'published').order('published_at', { ascending: false }).limit(6),
     supabase.from('static_pages').select('content_json').eq('slug', 'home').eq('status', 'published').maybeSingle(),
@@ -85,18 +83,12 @@ export default async function HomePage() {
         badge="UAE's #1 Car Service Platform"
         ctaLabel={c.hero?.cta_primary_text || 'Book Now'}
         ctaHref={c.hero?.cta_primary_link || '/contact'}
-        heroStats={[
-          { value: settings.hero_stat_1_value, label: settings.hero_stat_1_label },
-          { value: settings.hero_stat_2_value, label: settings.hero_stat_2_label },
-          { value: settings.hero_stat_3_value, label: settings.hero_stat_3_label },
-          { value: settings.hero_stat_4_value, label: settings.hero_stat_4_label },
-        ]}
+        rightSlot={<HeroLeadForm />}
       />
 
       {vis(c.trust_bar) && c.trust_bar?.stats && c.trust_bar.stats.length > 0 && <TrustBar items={c.trust_bar.stats} />}
 
       {vis(c.services) && <Reveal><ServiceCardsSection services={services} title={c.services?.heading || 'Popular Car Services'} subtitle="From routine maintenance to complex repairs — we cover it all." /></Reveal>}
-      {vis(c.brands) && <Reveal><BrandsGrid brands={brands} title={c.brands?.heading || 'Brands We Service'} /></Reveal>}
       {vis(c.how_it_works) && <Reveal><HowItWorks heading={c.how_it_works?.heading} steps={c.how_it_works?.steps} /></Reveal>}
       {vis(c.why_choose_us) && <Reveal><WhyChooseUs heading={c.why_choose_us?.heading} items={c.why_choose_us?.items} /></Reveal>}
       {vis(c.locations) && <Reveal><LocationsSection locations={activeStates} title={c.locations?.heading || 'Find Us Across UAE'} /></Reveal>}

@@ -161,31 +161,6 @@ export async function findHomepageServices(state: string, limit = 8): Promise<Re
   }
 }
 
-export interface HomepageBrandCard { name: string; slug: string; logo_url: string | null }
-
-// Homepage "Trusted Car Brands" — top published brand pages for a default
-// state (Dubai), joined with the `brands` table for the logo/display name.
-// Replaces the old empty `brands`-catalog-table-driven read; linking now
-// comes from real generated_pages rows, not /contact.
-export async function findHomepageBrands(state: string, limit = 12): Promise<HomepageBrandCard[]> {
-  try {
-    const supabase = createPublicSupabase()
-    const { data } = await supabase
-      .from('generated_pages')
-      .select('slug, brand_id, brands ( name, logo_url )')
-      .eq('status', 'published')
-      .eq('template_type', 'brand')
-      .eq('state', state)
-      .not('brand_id', 'is', null)
-      .limit(limit)
-    const rows = (data as unknown as Array<{ slug: string; brands: { name: string; logo_url: string | null } | null }>) ?? []
-    return rows
-      .filter((r): r is { slug: string; brands: { name: string; logo_url: string | null } } => !!r.brands)
-      .map(r => ({ name: r.brands.name, slug: r.slug, logo_url: r.brands.logo_url }))
-  } catch {
-    return []
-  }
-}
 
 // Footer "Display in Footer" pages — the only consumer of that flag.
 export async function findFooterPages(): Promise<RelatedLink[]> {
