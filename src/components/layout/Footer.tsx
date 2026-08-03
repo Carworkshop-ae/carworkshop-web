@@ -21,7 +21,13 @@ export const SOCIALS: Array<{ key: keyof SiteSettings; label: string; path: stri
 ]
 
 export function Footer({ settings, footerPages = [] }: FooterProps) {
-  const quickLinks = [...settings.footer_custom_links].filter(l => l.column === 1).sort((a, b) => a.order - b.order)
+  const isModelOrServiceLink = (label: string, link: string) => {
+    const text = `${label} ${link}`.toLowerCase()
+    return ['oil change', 'engine', 'repair', 'battery', 'brake', 'transmission', 'service in', 'repair in', 'audi a', 'hummer h', 'h2 '].some(p => text.includes(p))
+  }
+  const quickLinks = [...settings.footer_custom_links]
+    .filter(l => l.column === 1 && !isModelOrServiceLink(l.label, l.link))
+    .sort((a, b) => a.order - b.order)
   const socials = SOCIALS.map(s => ({ ...s, url: settings[s.key] as string | null })).filter(s => s.url)
   const extraBrands = (settings.footer_extra_brands ?? []).filter(b => b.label && b.link)
   const text = settings.footer_text_color
@@ -80,13 +86,12 @@ export function Footer({ settings, footerPages = [] }: FooterProps) {
             </div>
           )}
 
-          {/* Quick Navigation — hand-authored links + any SEO page marked "Display in Footer" */}
-          {settings.footer_show_quick_nav && (quickLinks.length > 0 || footerPages.length > 0) && (
+          {/* Quick Navigation — global links only */}
+          {settings.footer_show_quick_nav && quickLinks.length > 0 && (
             <div>
               <FooterHeading>{settings.footer_quick_nav_title}</FooterHeading>
               <ul className="mt-5 space-y-2.5 text-sm">
                 {quickLinks.map(l => <li key={l.link}><Link href={l.link} className="opacity-80 hover:opacity-100 hover:text-[#9DBBEB] transition-all">{l.label}</Link></li>)}
-                {footerPages.map(p => <li key={p.slug}><Link href={`/${p.slug}`} className="opacity-80 hover:opacity-100 hover:text-[#9DBBEB] transition-all">{p.h1}</Link></li>)}
               </ul>
             </div>
           )}

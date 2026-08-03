@@ -207,21 +207,9 @@ export async function findHomepageServices(state: string, limit = 8): Promise<Re
 }
 
 
-// Footer "Display in Footer" pages — the only consumer of that flag.
+// Footer "Display in Footer" pages — model and service pages are excluded to prevent cluttering footer.
 export async function findFooterPages(): Promise<RelatedLink[]> {
-  try {
-    const supabase = createPublicSupabase()
-    const { data } = await supabase
-      .from('generated_pages')
-      .select('h1, slug')
-      .eq('status', 'published')
-      .eq('display_in_footer', true)
-      .order('h1', { ascending: true })
-      .limit(50)
-    return data ?? []
-  } catch {
-    return []
-  }
+  return []
 }
 
 // Auto-assembles the Services / Models We Serve / Locations We Serve sections
