@@ -1,16 +1,18 @@
 import Script from 'next/script'
 import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton'
 import { CallButton } from '@/components/layout/CallButton'
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar'
 import { MobileCtaBar } from '@/components/layout/MobileCtaBar'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { getSettings } from '@/lib/hooks/useSettings'
-import { findFooterPages } from '@/lib/page-engine/content'
 
+// Footer is intentionally NOT rendered here — it varies by route (default
+// Footer for most pages vs BrandFooter for Dubai brand pages), and only a
+// nested layout that has access to the matched route's params can tell
+// those apart. See (default-footer)/layout.tsx and [...slug]/layout.tsx.
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const [settings, footerPages] = await Promise.all([getSettings(), findFooterPages()])
+  const settings = await getSettings()
 
   const ga4 = settings.ga4_id?.trim()
   const gtm = settings.gtm_id?.trim()
@@ -35,7 +37,6 @@ export default async function PublicLayout({ children }: { children: React.React
       <AnnouncementBar settings={settings} />
       <Header settings={settings} />
       <main className={settings.header_sticky ? 'pt-16' : ''}>{children}</main>
-      <Footer settings={settings} footerPages={footerPages} />
       <WhatsAppButton settings={settings} />
       <CallButton settings={settings} />
       <MobileCtaBar settings={settings} />

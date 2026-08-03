@@ -1,10 +1,14 @@
 import 'server-only'
+import { cache } from 'react'
 import { createServiceClient } from '@/lib/supabase/service'
 import { DEFAULT_SETTINGS, SERVER_ONLY_SETTING_KEYS, type SiteSettings } from '@/types/settings'
 
 // Server-side fetch of all site settings, merged over typed defaults so callers
 // always receive a complete SiteSettings object even if a key is missing.
-export async function getSettings(): Promise<SiteSettings> {
+// Wrapped in React's cache() so the root layout, the (default-footer) layout,
+// and the [...slug] layout can each call this within one request without
+// tripling the DB round-trip.
+export const getSettings = cache(async (): Promise<SiteSettings> => {
   try {
     const supabase = createServiceClient()
     const { data } = await supabase.from('website_settings').select('key, value')
@@ -22,4 +26,4 @@ export async function getSettings(): Promise<SiteSettings> {
   } catch {
     return DEFAULT_SETTINGS
   }
-}
+})

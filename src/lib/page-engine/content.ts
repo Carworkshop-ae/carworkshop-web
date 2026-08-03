@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { createPublicSupabase } from '@/lib/supabase/public'
 import type { PageContent, TemplateType } from '@/types'
 import type { SeoJson } from '@/lib/schemas/seo'
@@ -20,7 +21,10 @@ export interface GeneratedPageRow {
 
 const SELECT_COLS = 'id, slug, h1, template_type, brand_id, model_id, state, meta_title, meta_description, short_description, starting_price, content_json, seo_json'
 
-export async function getPageBySlug(slug: string): Promise<GeneratedPageRow | null> {
+// Wrapped in cache() so the [...slug] layout (which needs template_type to
+// pick a footer) and the page component share one DB call per request
+// instead of two.
+export const getPageBySlug = cache(async (slug: string): Promise<GeneratedPageRow | null> => {
   try {
     const supabase = createPublicSupabase()
     const { data } = await supabase
@@ -33,7 +37,7 @@ export async function getPageBySlug(slug: string): Promise<GeneratedPageRow | nu
   } catch {
     return null
   }
-}
+})
 
 export async function getBrandName(brandId: string | null): Promise<string | null> {
   if (!brandId) return null
@@ -122,6 +126,32 @@ export async function findServicePages(state: string, brandId?: string | null, m
 export async function findBrandPages(state: string): Promise<RelatedLink[]> {
   const rows = await findPublished({ template_type: 'brand', sameState: state })
   return rows.map(r => ({ h1: r.h1, slug: r.slug }))
+}
+
+export interface FooterBrandLink { name: string; slug: string }
+
+// "Brands We Service" grid for the Dubai brand-page footer — only brands
+// with an actual published /dubai/{slug} brand page (guarantees no dead
+// links), showing the brand's plain name (not that page's H1 copy).
+export async function findDubaiBrandsForFooter(): Promise<FooterBrandLink[]> {
+  try {
+    const supabase = createPublicSupabase()
+    const { data } = await supabase
+      .from('generated_pages')
+      .select('slug, brand_id, brands ( name )')
+      .eq('status', 'published')
+      .eq('template_type', 'brand')
+      .eq('state', 'Dubai')
+      .not('brand_id', 'is', null)
+      .limit(200)
+    const rows = (data as unknown as Array<{ slug: string; brands: { name: string } | null }>) ?? []
+    return rows
+      .filter((r): r is { slug: string; brands: { name: string } } => !!r.brands)
+      .map(r => ({ name: r.brands.name, slug: r.slug }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  } catch {
+    return []
+  }
 }
 
 // Distinct states with at least one published page — backs the /locations

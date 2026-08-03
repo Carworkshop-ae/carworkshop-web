@@ -103,6 +103,7 @@ export interface SiteSettings {
   social_youtube_url: string | null
   social_tiktok_url: string | null
   social_twitter_url: string | null
+  social_google_business_url: string | null
 
   announcement_bar_enabled: boolean
   announcement_bar_text: string
@@ -223,6 +224,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   social_youtube_url: null,
   social_tiktok_url: null,
   social_twitter_url: null,
+  social_google_business_url: null,
 
   announcement_bar_enabled: false,
   announcement_bar_text: 'Free pickup & delivery on all bookings this month!',
@@ -267,7 +269,7 @@ export const PUBLIC_SETTING_KEYS: Array<keyof SiteSettings> = [
   'footer_show_business_info', 'footer_show_quick_nav', 'footer_show_social',
   'footer_business_title', 'footer_business_address', 'footer_business_phone', 'footer_business_phone2', 'footer_business_email',
   'footer_quick_nav_title', 'footer_social_title', 'footer_extra_brands',
-  'social_instagram_url', 'social_facebook_url', 'social_linkedin_url', 'social_youtube_url', 'social_tiktok_url', 'social_twitter_url',
+  'social_instagram_url', 'social_facebook_url', 'social_linkedin_url', 'social_youtube_url', 'social_tiktok_url', 'social_twitter_url', 'social_google_business_url',
   'announcement_bar_enabled', 'announcement_bar_text', 'announcement_bar_bg_color', 'announcement_bar_text_color', 'announcement_bar_link',
   'ga4_id', 'gtm_id', 'gsc_meta', 'default_meta_title', 'default_meta_description', 'default_og_image',
 ]
