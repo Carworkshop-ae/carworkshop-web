@@ -40,25 +40,23 @@ export default function BrandsManagementPage() {
   const [newModelSlug, setNewModelSlug] = useState('')
   const [creatingModel, setCreatingModel] = useState(false)
 
-  const fetchBrands = useCallback(async () => {
+  const refreshBrands = useCallback(async () => {
     setLoadingBrands(true)
     try {
       const res = await fetch('/api/admin/brands')
       if (res.ok) {
         const data = await res.json()
-        setBrands(data.brands ?? [])
-        if (data.brands?.length && !selectedBrand) {
-          setSelectedBrand(data.brands[0])
-        }
+        const brandList: Brand[] = data.brands ?? []
+        setBrands(brandList)
       }
     } catch {
       toast.error('Failed to load Car Makes')
     } finally {
       setLoadingBrands(false)
     }
-  }, [selectedBrand])
+  }, [])
 
-  const fetchModels = useCallback(async (brandId: string) => {
+  const refreshModels = useCallback(async (brandId: string) => {
     setLoadingModels(true)
     try {
       const res = await fetch(`/api/admin/brands/${brandId}/models`)
@@ -74,16 +72,52 @@ export default function BrandsManagementPage() {
   }, [])
 
   useEffect(() => {
-    void fetchBrands()
-  }, [fetchBrands])
+    let isMounted = true
+    async function loadInitialBrands() {
+      setLoadingBrands(true)
+      try {
+        const res = await fetch('/api/admin/brands')
+        if (res.ok && isMounted) {
+          const data = await res.json()
+          const brandList: Brand[] = data.brands ?? []
+          setBrands(brandList)
+          if (brandList.length > 0) {
+            setSelectedBrand(prev => prev ?? brandList[0])
+          }
+        }
+      } catch {
+        if (isMounted) toast.error('Failed to load Car Makes')
+      } finally {
+        if (isMounted) setLoadingBrands(false)
+      }
+    }
+    void loadInitialBrands()
+    return () => { isMounted = false }
+  }, [])
 
   useEffect(() => {
-    if (selectedBrand) {
-      void fetchModels(selectedBrand.id)
-    } else {
-      setModels([])
+    let isMounted = true
+    if (!selectedBrand) {
+      queueMicrotask(() => { if (isMounted) setModels([]) })
+      return () => { isMounted = false }
     }
-  }, [selectedBrand, fetchModels])
+    async function loadModels(brandId: string) {
+      setLoadingModels(true)
+      try {
+        const res = await fetch(`/api/admin/brands/${brandId}/models`)
+        if (res.ok && isMounted) {
+          const data = await res.json()
+          setModels(data.models ?? [])
+        }
+      } catch {
+        if (isMounted) toast.error('Failed to load models')
+      } finally {
+        if (isMounted) setLoadingModels(false)
+      }
+    }
+    void loadModels(selectedBrand.id)
+    return () => { isMounted = false }
+  }, [selectedBrand])
 
   async function handleCreateBrand(e: React.FormEvent) {
     e.preventDefault()
@@ -222,7 +256,7 @@ export default function BrandsManagementPage() {
               actions={
                 <button
                   type="button"
-                  onClick={() => void fetchBrands()}
+                  onClick={() => void refreshBrands()}
                   className="text-zinc-500 hover:text-zinc-800 transition-colors p-1"
                   title="Refresh"
                 >
@@ -279,7 +313,7 @@ export default function BrandsManagementPage() {
                 selectedBrand ? (
                   <button
                     type="button"
-                    onClick={() => void fetchModels(selectedBrand.id)}
+                    onClick={() => void refreshModels(selectedBrand.id)}
                     className="text-zinc-500 hover:text-zinc-800 transition-colors p-1"
                     title="Refresh Models"
                   >
