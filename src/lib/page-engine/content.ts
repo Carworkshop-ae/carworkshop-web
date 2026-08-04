@@ -136,34 +136,45 @@ export interface FooterBrandLink { name: string; slug: string }
 export async function findDubaiBrandsForFooter(): Promise<FooterBrandLink[]> {
   try {
     const supabase = createPublicSupabase()
-    const { data: brandsData } = await supabase
-      .from('brands')
-      .select('name, slug')
-      .order('name', { ascending: true })
 
-    if (brandsData && brandsData.length > 0) {
-      return brandsData.map(b => {
-        const cleanBrandSlug = b.slug.replace(/^dubai\//, '').replace(/^\//, '')
-        return { name: b.name, slug: `dubai/${cleanBrandSlug}` }
-      })
-    }
-
-    const { data } = await supabase
+    // 1. Fetch published brand template pages for state = Dubai
+    const { data: pageData } = await supabase
       .from('generated_pages')
       .select('slug, brand_id, brands ( name )')
       .eq('status', 'published')
       .eq('template_type', 'brand')
       .eq('state', 'Dubai')
       .not('brand_id', 'is', null)
-      .limit(200)
-    const rows = (data as unknown as Array<{ slug: string; brands: { name: string } | null }>) ?? []
-    return rows
-      .filter((r): r is { slug: string; brands: { name: string } } => !!r.brands)
-      .map(r => {
-        const cleanSlug = r.slug.replace(/^\//, '')
-        return { name: r.brands.name, slug: cleanSlug }
-      })
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .limit(500)
+
+    const pageBrandLinks: FooterBrandLink[] = (pageData as unknown as Array<{ slug: string; brands: { name: string } | null }>)
+      ?.filter((r): r is { slug: string; brands: { name: string } } => !!r.brands)
+      .map(r => ({
+        name: r.brands.name,
+        slug: r.slug.replace(/^\//, ''),
+      })) ?? []
+
+    // 2. Fetch all brands in database
+    const { data: brandsData } = await supabase
+      .from('brands')
+      .select('name, slug')
+      .order('name', { ascending: true })
+
+    const tableBrandLinks: FooterBrandLink[] = (brandsData ?? []).map(b => {
+      const cleanBrandSlug = b.slug.replace(/^dubai\//, '').replace(/^\//, '')
+      return { name: b.name, slug: `dubai/${cleanBrandSlug}` }
+    })
+
+    // Merge and deduplicate by brand name
+    const map = new Map<string, FooterBrandLink>()
+    for (const b of pageBrandLinks) {
+      if (!map.has(b.name.toLowerCase())) map.set(b.name.toLowerCase(), b)
+    }
+    for (const b of tableBrandLinks) {
+      if (!map.has(b.name.toLowerCase())) map.set(b.name.toLowerCase(), b)
+    }
+
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
   } catch {
     return []
   }
@@ -207,21 +218,9 @@ export async function findHomepageServices(state: string, limit = 8): Promise<Re
 }
 
 
-// Footer "Display in Footer" pages — the only consumer of that flag.
+// Footer "Display in Footer" pages — model and service pages are excluded to prevent cluttering footer.
 export async function findFooterPages(): Promise<RelatedLink[]> {
-  try {
-    const supabase = createPublicSupabase()
-    const { data } = await supabase
-      .from('generated_pages')
-      .select('h1, slug')
-      .eq('status', 'published')
-      .eq('display_in_footer', true)
-      .order('h1', { ascending: true })
-      .limit(50)
-    return data ?? []
-  } catch {
-    return []
-  }
+  return []
 }
 
 // Auto-assembles the Services / Models We Serve / Locations We Serve sections

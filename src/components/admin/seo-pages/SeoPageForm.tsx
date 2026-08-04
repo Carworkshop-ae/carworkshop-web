@@ -216,21 +216,29 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
         </div>
 
         {(requiresBrand || requiresModel) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AdminSelect
-              label="Car Make" required={requiresBrand}
-              value={v.brand_id}
-              onChange={e => { set('brand_id', e.target.value); set('model_id', ''); setSlugEdited(false) }}
-              options={[{ value: '', label: 'Choose Make' }, ...brands.map(b => ({ value: b.id, label: b.name }))]}
-            />
-            {requiresModel ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold text-zinc-500">
+              <span>Car Make &amp; Model Selection</span>
+              <a href="/admin/brands" target="_blank" rel="noopener noreferrer" className="text-[#4472C4] hover:underline font-medium">
+                + Create / Manage Car Makes &amp; Models
+              </a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <AdminSelect
-                label="Car Model" required
-                value={v.model_id}
-                onChange={e => { set('model_id', e.target.value); setSlugEdited(false) }}
-                options={[{ value: '', label: 'Choose Model' }, ...models.map(m => ({ value: m.id, label: m.name }))]}
+                label="Car Make" required={requiresBrand}
+                value={v.brand_id}
+                onChange={e => { set('brand_id', e.target.value); set('model_id', ''); setSlugEdited(false) }}
+                options={[{ value: '', label: 'Choose Make' }, ...brands.map(b => ({ value: b.id, label: b.name }))]}
               />
-            ) : <div />}
+              {requiresModel ? (
+                <AdminSelect
+                  label="Car Model" required
+                  value={v.model_id}
+                  onChange={e => { set('model_id', e.target.value); setSlugEdited(false) }}
+                  options={[{ value: '', label: 'Choose Model' }, ...models.map(m => ({ value: m.id, label: m.name }))]}
+                />
+              ) : <div />}
+            </div>
           </div>
         )}
 

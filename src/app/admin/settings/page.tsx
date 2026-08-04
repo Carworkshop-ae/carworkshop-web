@@ -8,13 +8,11 @@ import { AdminCard } from '@/components/admin/ui/AdminCard'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { AdminLabel } from '@/components/admin/ui/AdminField'
 import { CharCounter } from '@/components/admin/ui/CharCounter'
-import { DEFAULT_SETTINGS, type SiteSettings, type NavItem, type FooterLink } from '@/types/settings'
-import { GripVertical, Trash2, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react'
+import { DEFAULT_SETTINGS, type SiteSettings } from '@/types/settings'
+import { ExternalLink } from 'lucide-react'
 
 const TABS: Array<{ id: string; label: string }> = [
   { id: 'general', label: 'General' },
-  { id: 'header', label: 'Header & Nav' },
-  { id: 'footer', label: 'Footer' },
   { id: 'contact-buttons', label: 'WhatsApp & Call' },
   { id: 'social', label: 'Social Media' },
   { id: 'announcement', label: 'Announcement' },
@@ -107,7 +105,7 @@ function SettingsInner() {
   return (
     <div className="p-6 lg:p-8">
       <h1 className="text-2xl font-bold text-zinc-900 mb-1">Website Settings</h1>
-      <p className="text-sm text-zinc-500 mb-6">Manage header, footer, navigation, floating buttons and more — no code required.</p>
+      <p className="text-sm text-zinc-500 mb-6">Manage website configuration, business contact, social media, and email settings.</p>
 
       <div className="flex flex-wrap gap-0 border-b border-zinc-200 mb-6 overflow-x-auto">
         {TABS.map(t => (
@@ -122,8 +120,6 @@ function SettingsInner() {
       </div>
 
       {activeTab === 'general' && <GeneralTab settings={settings} set={set} saveKeys={saveKeys} onSave={() => saveKeys(['site_name', 'site_tagline', 'site_logo_url', 'site_favicon_url'])} />}
-      {activeTab === 'header' && <HeaderTab settings={settings} set={set} toggle={toggle} onSaveHeader={() => saveKeys(['header_logo_url', 'header_phone_number', 'header_phone_visible', 'header_whatsapp_visible', 'header_cta_text', 'header_cta_link', 'header_cta_visible', 'header_background_color', 'header_text_color', 'header_sticky'])} onSaveNav={() => saveKeys(['nav_items'])} />}
-      {activeTab === 'footer' && <FooterTab settings={settings} set={set} toggle={toggle} onSave={() => saveKeys(['footer_logo_url', 'footer_tagline', 'footer_background_color', 'footer_text_color', 'footer_copyright_text', 'footer_show_services_column', 'footer_show_brands_column', 'footer_show_locations_column', 'footer_custom_links', 'footer_show_business_info', 'footer_show_quick_nav', 'footer_show_social', 'footer_business_title', 'footer_business_address', 'footer_business_phone', 'footer_business_phone2', 'footer_business_email', 'footer_quick_nav_title', 'footer_social_title', 'footer_extra_brands'])} />}
       {activeTab === 'contact-buttons' && <ContactButtonsTab settings={settings} set={set} toggle={toggle} onSave={() => saveKeys(['whatsapp_enabled', 'whatsapp_number', 'whatsapp_message', 'whatsapp_position', 'call_enabled', 'call_number', 'call_position'])} />}
       {activeTab === 'social' && <SocialTab settings={settings} set={set} onSave={() => saveKeys(['social_instagram_url', 'social_facebook_url', 'social_linkedin_url', 'social_youtube_url', 'social_tiktok_url', 'social_twitter_url', 'social_google_business_url'])} />}
       {activeTab === 'announcement' && <AnnouncementTab settings={settings} set={set} toggle={toggle} onSave={() => saveKeys(['announcement_bar_enabled', 'announcement_bar_text', 'announcement_bar_bg_color', 'announcement_bar_text_color', 'announcement_bar_link'])} />}
@@ -133,7 +129,7 @@ function SettingsInner() {
   )
 }
 
-/* ─── Shared field components (new design system) ─────────────────────────── */
+/* ─── Shared field components ─────────────────────────────────────────────── */
 
 type SetFn = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) => void
 
@@ -209,6 +205,18 @@ function GeneralTab({ settings, set, saveKeys, onSave }: { settings: SiteSetting
         </div>
       </AdminCard>
 
+      <AdminCard title="Business Information (Footer & Contact)">
+        <div className="space-y-4">
+          <Field label="Business Address" value={settings.footer_business_address} onChange={v => set('footer_business_address', v)} placeholder="Al Quoz Industrial Area, Dubai, UAE" />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Primary Phone" value={settings.footer_business_phone} onChange={v => set('footer_business_phone', v)} placeholder="+97150…" />
+            <Field label="Secondary Phone (optional)" value={settings.footer_business_phone2} onChange={v => set('footer_business_phone2', v)} />
+          </div>
+          <Field label="Business Email" value={settings.footer_business_email} onChange={v => set('footer_business_email', v)} placeholder="info@carworkshop.ae" />
+          <AdminButton variant="orange" onClick={() => saveKeys(['footer_business_address', 'footer_business_phone', 'footer_business_phone2', 'footer_business_email'])}>Save Business Info</AdminButton>
+        </div>
+      </AdminCard>
+
       <AdminCard title="Hero Stats Cards" description="The 4 stat cells shown in the home hero's right-side card.">
         <div className="space-y-3">
           {heroRows.map(([vKey, lKey], i) => (
@@ -218,186 +226,6 @@ function GeneralTab({ settings, set, saveKeys, onSave }: { settings: SiteSetting
             </div>
           ))}
           <AdminButton variant="orange" onClick={() => saveKeys(heroRows.flat())}>Save Hero Stats</AdminButton>
-        </div>
-      </AdminCard>
-
-      <AdminCard title="Blog Default CTA" description="Used on blog posts (and as the default).">
-        <div className="space-y-3">
-          <Field label="Headline" value={settings.blog_cta_headline} onChange={v => set('blog_cta_headline', v)} />
-          <Field label="Subheadline" value={settings.blog_cta_subheadline} onChange={v => set('blog_cta_subheadline', v)} />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Button Text" value={settings.blog_cta_button_text} onChange={v => set('blog_cta_button_text', v)} />
-            <Field label="Button Link" value={settings.blog_cta_button_link} onChange={v => set('blog_cta_button_link', v)} />
-          </div>
-          <Field label="Default Author Name" value={settings.default_author_name} onChange={v => set('default_author_name', v)} helper="Shown when a post has no assigned author." />
-          <AdminButton variant="orange" onClick={() => saveKeys(['blog_cta_headline', 'blog_cta_subheadline', 'blog_cta_button_text', 'blog_cta_button_link', 'default_author_name'])}>Save Blog Settings</AdminButton>
-        </div>
-      </AdminCard>
-    </div>
-  )
-}
-
-function HeaderTab({ settings, set, toggle, onSaveHeader, onSaveNav }: { settings: SiteSettings; set: SetFn; toggle: (k: keyof SiteSettings) => void; onSaveHeader: () => void; onSaveNav: () => void }) {
-  const navItems = [...settings.nav_items].sort((a, b) => a.order - b.order)
-  function updateNav(items: NavItem[]) { set('nav_items', items.map((n, i) => ({ ...n, order: i + 1 }))) }
-  function moveNav(idx: number, dir: -1 | 1) {
-    const next = [...navItems]; const j = idx + dir
-    if (j < 0 || j >= next.length) return
-    ;[next[idx], next[j]] = [next[j], next[idx]]
-    updateNav(next)
-  }
-
-  return (
-    <div className="max-w-3xl space-y-5">
-      <AdminCard title="Header Preview">
-        <div className="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3" style={{ backgroundColor: settings.header_background_color }}>
-          <span className="font-extrabold" style={{ color: settings.header_text_color }}>Car<span className="text-[#E8601C]">Workshop</span>.ae</span>
-          <div className="hidden sm:flex gap-3 text-sm" style={{ color: settings.header_text_color }}>
-            {navItems.filter(n => n.visible).slice(0, 4).map(n => <span key={n.id}>{n.label}</span>)}
-          </div>
-          {settings.header_cta_visible && <span className="px-3 py-1.5 rounded bg-[#E8601C] text-white text-xs font-semibold">{settings.header_cta_text}</span>}
-        </div>
-      </AdminCard>
-
-      <AdminCard title="Header Settings">
-        <div className="space-y-4">
-          <MediaPicker label="Logo" value={settings.header_logo_url} onChange={v => set('header_logo_url', v)} />
-          <Field label="Phone Number" value={settings.header_phone_number} onChange={v => set('header_phone_number', v)} helper="Include country code, e.g. +971501234567" />
-          <Toggle label="Show Phone in Header" checked={settings.header_phone_visible} onChange={() => toggle('header_phone_visible')} />
-          <Toggle label="Show WhatsApp in Header" checked={settings.header_whatsapp_visible} onChange={() => toggle('header_whatsapp_visible')} />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="CTA Button Text" value={settings.header_cta_text} onChange={v => set('header_cta_text', v)} />
-            <Field label="CTA Button Link" value={settings.header_cta_link} onChange={v => set('header_cta_link', v)} />
-          </div>
-          <Toggle label="Show CTA Button" checked={settings.header_cta_visible} onChange={() => toggle('header_cta_visible')} />
-          <div className="grid grid-cols-2 gap-3">
-            <ColorField label="Header Background" value={settings.header_background_color} onChange={v => set('header_background_color', v)} />
-            <ColorField label="Header Text Color" value={settings.header_text_color} onChange={v => set('header_text_color', v)} />
-          </div>
-          <Toggle label="Sticky Header" checked={settings.header_sticky} onChange={() => toggle('header_sticky')} />
-          <AdminButton variant="orange" onClick={onSaveHeader}>Save Header</AdminButton>
-        </div>
-      </AdminCard>
-
-      <AdminCard title="Navigation Menu" description="Reorder with arrows. Toggle to show/hide. Add submenu links under any item.">
-        <div className="space-y-4">
-          {navItems.map((item, idx) => {
-            const kids = item.children ?? []
-            const setKids = (next: typeof kids) => updateNav(navItems.map(n => n.id === item.id ? { ...n, children: next } : n))
-            return (
-              <div key={item.id} className="rounded-lg border border-zinc-200 p-2.5">
-                <div className="flex items-center gap-2">
-                  <GripVertical size={15} className="text-zinc-300 shrink-0" />
-                  <div className="flex flex-col text-zinc-400">
-                    <button type="button" onClick={() => moveNav(idx, -1)} disabled={idx === 0} className="disabled:opacity-30" aria-label="Move up"><ChevronUp size={14} /></button>
-                    <button type="button" onClick={() => moveNav(idx, 1)} disabled={idx === navItems.length - 1} className="disabled:opacity-30" aria-label="Move down"><ChevronDown size={14} /></button>
-                  </div>
-                  <button type="button" onClick={() => updateNav(navItems.map(n => n.id === item.id ? { ...n, visible: !n.visible } : n))} className={['w-8 text-center', item.visible ? 'text-green-600' : 'text-zinc-300'].join(' ')} aria-label="Toggle visible">{item.visible ? '✓' : '○'}</button>
-                  <input value={item.label} onChange={e => updateNav(navItems.map(n => n.id === item.id ? { ...n, label: e.target.value } : n))} className={`${inputCls} flex-1 py-1.5`} placeholder="Label" />
-                  <input value={item.link} onChange={e => updateNav(navItems.map(n => n.id === item.id ? { ...n, link: e.target.value } : n))} className={`${inputCls} flex-1 py-1.5 font-mono`} placeholder="/link" />
-                  <button type="button" onClick={() => updateNav(navItems.filter(n => n.id !== item.id))} className="text-zinc-400 hover:text-red-500 shrink-0" aria-label="Delete"><Trash2 size={15} /></button>
-                </div>
-                <div className="pl-12 pr-8 mt-2 space-y-1.5">
-                  {kids.map((c, ci) => (
-                    <div key={ci} className="flex items-center gap-2">
-                      <span className="text-zinc-300 text-xs">↳</span>
-                      <input value={c.label} onChange={e => setKids(kids.map((x, i) => i === ci ? { ...x, label: e.target.value } : x))} className={`${inputCls} flex-1 py-1`} placeholder="Submenu label" />
-                      <input value={c.link} onChange={e => setKids(kids.map((x, i) => i === ci ? { ...x, link: e.target.value } : x))} className={`${inputCls} flex-1 py-1 font-mono`} placeholder="/link" />
-                      <button type="button" onClick={() => setKids(kids.filter((_, i) => i !== ci))} className="text-zinc-400 hover:text-red-500 shrink-0" aria-label="Delete submenu"><Trash2 size={13} /></button>
-                    </div>
-                  ))}
-                  <button type="button" onClick={() => setKids([...kids, { label: 'New', link: '/' }])} className="inline-flex items-center gap-1 text-xs text-[#4472C4] hover:underline"><Plus size={12} /> Add submenu link</button>
-                  {item.children === undefined && (item.link === '/services' || item.link === '/brands') && (
-                    <p className="text-[11px] text-zinc-400">Leave empty to auto-show {item.link === '/services' ? 'services' : 'brands'} from the database.</p>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-          <button type="button" onClick={() => updateNav([...navItems, { id: String(Date.now()), label: 'New', link: '/', has_dropdown: false, visible: true, order: navItems.length + 1 }])} className="inline-flex items-center gap-1 text-sm text-[#4472C4] hover:underline pt-1"><Plus size={14} /> Add Nav Item</button>
-          <div className="pt-1"><AdminButton variant="orange" onClick={onSaveNav}>Save Navigation</AdminButton></div>
-        </div>
-      </AdminCard>
-    </div>
-  )
-}
-
-function FooterTab({ settings, set, toggle, onSave }: { settings: SiteSettings; set: SetFn; toggle: (k: keyof SiteSettings) => void; onSave: () => void }) {
-  const links = [...settings.footer_custom_links].filter(l => l.column === 1).sort((a, b) => a.order - b.order)
-  function updateLinks(next: FooterLink[]) { set('footer_custom_links', next.map((l, i) => ({ ...l, column: 1 as const, order: i + 1 }))) }
-  const extraBrands = settings.footer_extra_brands ?? []
-  function updateExtraBrands(next: typeof extraBrands) { set('footer_extra_brands', next) }
-
-  return (
-    <div className="max-w-3xl space-y-5">
-      <AdminCard title="Footer Preview">
-        <div className="rounded-lg p-4 text-xs" style={{ backgroundColor: settings.footer_background_color, color: settings.footer_text_color }}>
-          <p className="font-extrabold mb-1">CarWorkshop.ae</p>
-          <p className="opacity-80 mb-2">{settings.footer_tagline}</p>
-          <p className="opacity-70">{settings.footer_copyright_text}</p>
-        </div>
-      </AdminCard>
-
-      <AdminCard title="Footer Settings">
-        <div className="space-y-4">
-          <MediaPicker label="Footer Logo" value={settings.footer_logo_url} onChange={v => set('footer_logo_url', v)} />
-          <Field label="Footer Tagline" value={settings.footer_tagline} onChange={v => set('footer_tagline', v)} />
-          <div className="grid grid-cols-2 gap-3">
-            <ColorField label="Background Color" value={settings.footer_background_color} onChange={v => set('footer_background_color', v)} />
-            <ColorField label="Text Color" value={settings.footer_text_color} onChange={v => set('footer_text_color', v)} />
-          </div>
-          <Field label="Copyright Text" value={settings.footer_copyright_text} onChange={v => set('footer_copyright_text', v)} />
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1">
-            <Toggle label="Brands section" checked={settings.footer_show_brands_column} onChange={() => toggle('footer_show_brands_column')} />
-            <Toggle label="Business Information" checked={settings.footer_show_business_info} onChange={() => toggle('footer_show_business_info')} />
-            <Toggle label="Quick Navigation" checked={settings.footer_show_quick_nav} onChange={() => toggle('footer_show_quick_nav')} />
-            <Toggle label="Social media" checked={settings.footer_show_social} onChange={() => toggle('footer_show_social')} />
-            <Toggle label="Services column" checked={settings.footer_show_services_column} onChange={() => toggle('footer_show_services_column')} />
-            <Toggle label="Locations column" checked={settings.footer_show_locations_column} onChange={() => toggle('footer_show_locations_column')} />
-          </div>
-        </div>
-      </AdminCard>
-
-      <AdminCard title="Business Information" description="Shown when the Business Information section is enabled.">
-        <div className="space-y-4">
-          <Field label="Section Title" value={settings.footer_business_title} onChange={v => set('footer_business_title', v)} />
-          <Field label="Address" value={settings.footer_business_address} onChange={v => set('footer_business_address', v)} placeholder="Al Quoz Industrial Area, Dubai, UAE" />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Phone" value={settings.footer_business_phone} onChange={v => set('footer_business_phone', v)} placeholder="+97150…" />
-            <Field label="Phone 2 (optional)" value={settings.footer_business_phone2} onChange={v => set('footer_business_phone2', v)} />
-          </div>
-          <Field label="Email" value={settings.footer_business_email} onChange={v => set('footer_business_email', v)} placeholder="info@carworkshop.ae" />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Quick Nav Title" value={settings.footer_quick_nav_title} onChange={v => set('footer_quick_nav_title', v)} />
-            <Field label="Social Title" value={settings.footer_social_title} onChange={v => set('footer_social_title', v)} />
-          </div>
-        </div>
-      </AdminCard>
-
-      <AdminCard title="Extra Brand Links" description="Brands you don't have full pages for yet. Auto brands from the CMS show first; these are appended.">
-        <div className="space-y-2">
-          {extraBrands.map((b, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <input value={b.label} onChange={e => updateExtraBrands(extraBrands.map((x, i) => i === idx ? { ...x, label: e.target.value } : x))} className={`${inputCls} flex-1 py-1.5`} placeholder="Bentley Service" />
-              <input value={b.link} onChange={e => updateExtraBrands(extraBrands.map((x, i) => i === idx ? { ...x, link: e.target.value } : x))} className={`${inputCls} flex-1 py-1.5 font-mono`} placeholder="/brands/bentley or https://…" />
-              <button type="button" onClick={() => updateExtraBrands(extraBrands.filter((_, i) => i !== idx))} className="text-zinc-400 hover:text-red-500 shrink-0" aria-label="Delete"><Trash2 size={15} /></button>
-            </div>
-          ))}
-          <button type="button" onClick={() => updateExtraBrands([...extraBrands, { label: '', link: '' }])} className="inline-flex items-center gap-1 text-sm text-[#4472C4] hover:underline pt-1"><Plus size={14} /> Add Brand Link</button>
-        </div>
-      </AdminCard>
-
-      <AdminCard title="Quick Navigation Links">
-        <div className="space-y-2">
-          {links.map((l, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <input value={l.label} onChange={e => updateLinks(links.map((x, i) => i === idx ? { ...x, label: e.target.value } : x))} className={`${inputCls} flex-1 py-1.5`} placeholder="Label" />
-              <input value={l.link} onChange={e => updateLinks(links.map((x, i) => i === idx ? { ...x, link: e.target.value } : x))} className={`${inputCls} flex-1 py-1.5 font-mono`} placeholder="/link" />
-              <button type="button" onClick={() => updateLinks(links.filter((_, i) => i !== idx))} className="text-zinc-400 hover:text-red-500 shrink-0" aria-label="Delete"><Trash2 size={15} /></button>
-            </div>
-          ))}
-          <button type="button" onClick={() => updateLinks([...links, { label: 'New Link', link: '/', column: 1, order: links.length + 1 }])} className="inline-flex items-center gap-1 text-sm text-[#4472C4] hover:underline pt-1"><Plus size={14} /> Add Link</button>
-          <div className="pt-1"><AdminButton variant="orange" onClick={onSave}>Save Footer</AdminButton></div>
         </div>
       </AdminCard>
     </div>
