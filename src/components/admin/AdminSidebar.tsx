@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, HelpCircle, Languages, Files, FileText, Wrench,
-  FileSearch, Search, Settings, UserCog, Users,
+  FileSearch, Search, Settings, UserCog, Users, Car,
   Image as ImageIcon, Activity, LogOut, ChevronDown, type LucideIcon,
 } from 'lucide-react'
 import { subscribeCollapsed, getCollapsed } from './sidebar-store'
@@ -14,11 +14,12 @@ import type { UserRole } from '@/types'
 interface NavItem { label: string; href: string; icon: LucideIcon }
 
 // The ONLY hrefs the restricted seo_editor role may see.
-const SEO_EDITOR_ALLOWED = ['/admin/seo-pages', '/admin/seo-blog', '/admin/service-content', '/admin/static-page-seo', '/admin/search-content']
+const SEO_EDITOR_ALLOWED = ['/admin/seo-pages', '/admin/seo-blog', '/admin/service-content', '/admin/static-page-seo', '/admin/search-content', '/admin/brands']
 
 // Main nav — ServiceMyCar order.
 const MAIN_NAV: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { label: 'Car Makes & Models', href: '/admin/brands', icon: Car },
   { label: "FAQ's", href: '/admin/faqs', icon: HelpCircle },
   { label: 'Language Key', href: '/admin/language-key', icon: Languages },
   { label: 'SEO Pages', href: '/admin/seo-pages', icon: Files },

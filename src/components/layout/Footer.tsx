@@ -1,134 +1,275 @@
 import Link from 'next/link'
-import Image from 'next/image'
-import { MapPin, Phone, Mail } from 'lucide-react'
 import type { SiteSettings } from '@/types/settings'
-import type { RelatedLink } from '@/lib/page-engine/content'
+import { findDubaiBrandsForFooter, type FooterBrandLink } from '@/lib/page-engine/content'
 
 interface FooterProps {
   settings: SiteSettings
-  footerPages?: RelatedLink[]
+  footerPages?: unknown[]
+  brandsOverride?: FooterBrandLink[]
 }
 
-// Inline brand glyphs (lucide v1 dropped brand icons). Single-path, 24×24.
-// Exported so BrandFooter (Dubai brand pages) can reuse the same icon paths.
-export const SOCIALS: Array<{ key: keyof SiteSettings; label: string; path: string }> = [
-  { key: 'social_instagram_url', label: 'Instagram', path: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z' },
-  { key: 'social_facebook_url', label: 'Facebook', path: 'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' },
-  { key: 'social_linkedin_url', label: 'LinkedIn', path: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z' },
-  { key: 'social_youtube_url', label: 'YouTube', path: 'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z' },
-  { key: 'social_tiktok_url', label: 'TikTok', path: 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z' },
-  { key: 'social_twitter_url', label: 'X', path: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zM17.083 19.77h1.833L7.084 4.126H5.117z' },
+const DEFAULT_DUBAI_BRANDS = [
+  'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW',
+  'Bugatti', 'Cadillac', 'Chevrolet', 'Citroen', 'Dodge', 'Ferrari',
+  'Fiat', 'Ford', 'Geely', 'GMC', 'Honda', 'Hummer',
+  'Hyundai', 'Infiniti', 'Jaguar', 'Jeep', 'Kia', 'Lamborghini',
+  'Land Rover', 'Lexus', 'Lincoln', 'Maserati', 'Mazda', 'McLaren',
+  'Mercedes', 'MG', 'Mini', 'Mitsubishi', 'Nissan', 'Opel',
+  'Peugeot', 'Porsche', 'Renault', 'Rolls Royce', 'Skoda', 'Subaru',
+  'Suzuki', 'Toyota', 'Volkswagen', 'Volvo',
+].sort((a, b) => a.localeCompare(b))
+
+const QUICK_NAV = [
+  { label: 'Home', href: '/' },
+  { label: 'How It Works', href: '/#how-it-works' },
+  { label: 'FAQs', href: '/faq' },
+  { label: 'Contact Us', href: '/contact' },
+  { label: 'Car Garage', href: '/dubai/brands' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Download', href: '/#download' },
+  { label: 'EV Charge Installation', href: '/dubai/services' },
+  { label: 'Car Service Sharjah', href: '/sharjah/services' },
+  { label: 'Car Service Abu Dhabi', href: '/abu-dhabi/services' },
 ]
 
-export function Footer({ settings, footerPages = [] }: FooterProps) {
-  const isModelOrServiceLink = (label: string, link: string) => {
-    const text = `${label} ${link}`.toLowerCase()
-    return ['oil change', 'engine', 'repair', 'battery', 'brake', 'transmission', 'service in', 'repair in', 'audi a', 'hummer h', 'h2 '].some(p => text.includes(p))
+export async function Footer({ settings, brandsOverride }: FooterProps) {
+  let dbBrands: FooterBrandLink[] = brandsOverride ?? []
+  if (dbBrands.length === 0) {
+    dbBrands = await findDubaiBrandsForFooter()
   }
-  const quickLinks = [...settings.footer_custom_links]
-    .filter(l => l.column === 1 && !isModelOrServiceLink(l.label, l.link))
-    .sort((a, b) => a.order - b.order)
-  const socials = SOCIALS.map(s => ({ ...s, url: settings[s.key] as string | null })).filter(s => s.url)
-  const extraBrands = (settings.footer_extra_brands ?? []).filter(b => b.label && b.link)
-  const text = settings.footer_text_color
-  const phoneTel = settings.footer_business_phone.replace(/[^0-9+]/g, '')
+
+  // Format brand list to guarantee ascending order (A-Z)
+  const brandsList = (dbBrands.length > 0
+    ? dbBrands.map(b => ({
+        name: b.name.toLowerCase().includes('service') ? b.name : `${b.name} Service`,
+        href: b.slug.startsWith('/') ? b.slug : `/${b.slug}`,
+      }))
+    : DEFAULT_DUBAI_BRANDS.map(name => ({
+        name: `${name} Service`,
+        href: `/dubai/${name.toLowerCase().replace(/\s+/g, '-')}`,
+      }))
+  ).sort((a, b) => a.name.localeCompare(b.name))
+
+  const bgColor = settings.footer_background_color || '#15A24A'
+  const textColor = settings.footer_text_color || '#FFFFFF'
+  const phone = settings.footer_business_phone || '8002665464'
+  const phoneTel = phone.replace(/[^0-9+]/g, '')
+  const email = settings.footer_business_email || 'info@carworkshop.ae'
+  const address = settings.footer_business_address || 'Plot # 369 - 322 Street 21, Al Quoz Industrial Area 4, Dubai, UAE'
 
   return (
-    <footer style={{ backgroundColor: settings.footer_background_color, color: text }} role="contentinfo" className="relative overflow-hidden">
-      <div className="absolute inset-0 texture-dots opacity-[0.05] pointer-events-none" aria-hidden="true" />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
+    <footer style={{ backgroundColor: bgColor, color: textColor }} role="contentinfo" className="relative overflow-hidden font-sans border-t border-white/10">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        
+        {/* Tier 1: Brands We Service (6-column responsive grid in ascending A-Z order) */}
+        <div className="pb-10 mb-10 border-b border-white/20">
+          <h3 className="text-xl font-bold mb-6 text-white tracking-tight">
+            Brands We Service
+          </h3>
+          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2.5 text-xs">
+            {brandsList.map((brand, idx) => (
+              <li key={`brand-${idx}`}>
+                <Link
+                  href={brand.href}
+                  className="hover:underline opacity-90 hover:opacity-100 transition-opacity whitespace-nowrap block truncate text-white/90 hover:text-white"
+                >
+                  {brand.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        {/* Brands We Service — wide (admin-configured extra links only) */}
-        {settings.footer_show_brands_column && extraBrands.length > 0 && (
-          <div className="pb-12 mb-12 border-b border-white/10">
-            <FooterHeading>{settings.footer_column3_title || 'Brands We Service'}</FooterHeading>
-            <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-2.5 mt-5">
-              {extraBrands.map((b, i) => (
-                <li key={`x-${i}`}><Link href={b.link} className="text-sm opacity-80 hover:opacity-100 hover:text-[#9DBBEB] transition-all">{b.label}</Link></li>
+        {/* Tier 2: 4 Main Columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 text-xs">
+          
+          {/* Column 1: Business Information */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
+              Business Information
+            </h4>
+            <p className="leading-relaxed opacity-95 text-white/90">
+              {address}
+            </p>
+            <p className="opacity-95 font-medium text-white/90">
+              PO Box : 333761
+            </p>
+
+            {/* Red 800 BOOKING CTA button */}
+            <div className="pt-2 pb-1">
+              <a
+                href={`tel:${phoneTel}`}
+                className="inline-flex items-center justify-center bg-[#E52E2E] hover:bg-[#CC2525] text-white font-extrabold px-6 py-2.5 rounded-md shadow-md text-sm uppercase tracking-wider transition-all transform hover:scale-[1.02]"
+              >
+                Call 800 BOOKING
+              </a>
+            </div>
+
+            <p className="opacity-90">
+              <span className="font-semibold">Business Phone:</span> {phone}
+            </p>
+            <p className="opacity-90">
+              <span className="font-semibold">Phone:</span> (04) 703 8999
+            </p>
+            <p className="opacity-90">
+              <span className="font-semibold">Email:</span>{' '}
+              <a href={`mailto:${email}`} className="hover:underline">
+                {email}
+              </a>
+            </p>
+          </div>
+
+          {/* Column 2: Quick Navigation Links */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
+              Quick Navigation Links
+            </h4>
+            <ul className="space-y-2 text-white/90">
+              {QUICK_NAV.map((item, idx) => (
+                <li key={`nav-${idx}`}>
+                  <Link href={item.href} className="hover:underline opacity-90 hover:opacity-100 transition-opacity">
+                    {item.label}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>
-        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand identity */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-block mb-4" aria-label={`${settings.site_name} home`}>
-              {settings.footer_logo_url ? (
-                <Image src={settings.footer_logo_url} alt={`${settings.site_name} logo`} width={160} height={40} className="h-9 w-auto object-contain" />
-              ) : (
-                <span className="text-2xl font-extrabold tracking-tight">
-                  <span className="text-[#6891D6]">Car</span><span className="text-[#E8601C]">Workshop</span><span style={{ color: text }}>.ae</span>
-                </span>
-              )}
-            </Link>
-            <p className="text-sm leading-relaxed opacity-80 max-w-xs">{settings.footer_tagline}</p>
-          </div>
-
-          {/* Business Information */}
-          {settings.footer_show_business_info && (
+          {/* Column 3: Connect With Us & Secured By */}
+          <div className="space-y-6">
             <div>
-              <FooterHeading>{settings.footer_business_title}</FooterHeading>
-              <ul className="mt-5 space-y-3 text-sm">
-                {settings.footer_business_address && (
-                  <li className="flex gap-2.5 opacity-85"><MapPin size={17} className="shrink-0 mt-0.5 text-[#6891D6]" /><span>{settings.footer_business_address}</span></li>
-                )}
-                {settings.footer_business_phone && (
-                  <li><a href={`tel:${phoneTel}`} className="flex items-center gap-2.5 opacity-85 hover:opacity-100 transition-opacity"><Phone size={17} className="shrink-0 text-[#6891D6]" />{settings.footer_business_phone}</a></li>
-                )}
-                {settings.footer_business_phone2 && (
-                  <li><a href={`tel:${settings.footer_business_phone2.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-2.5 opacity-85 hover:opacity-100 transition-opacity"><Phone size={17} className="shrink-0 text-[#6891D6]" />{settings.footer_business_phone2}</a></li>
-                )}
-                {settings.footer_business_email && (
-                  <li><a href={`mailto:${settings.footer_business_email}`} className="flex items-center gap-2.5 opacity-85 hover:opacity-100 transition-opacity"><Mail size={17} className="shrink-0 text-[#6891D6]" />{settings.footer_business_email}</a></li>
-                )}
-              </ul>
-            </div>
-          )}
-
-          {/* Quick Navigation — global links only */}
-          {settings.footer_show_quick_nav && quickLinks.length > 0 && (
-            <div>
-              <FooterHeading>{settings.footer_quick_nav_title}</FooterHeading>
-              <ul className="mt-5 space-y-2.5 text-sm">
-                {quickLinks.map(l => <li key={l.link}><Link href={l.link} className="opacity-80 hover:opacity-100 hover:text-[#9DBBEB] transition-all">{l.label}</Link></li>)}
-              </ul>
-            </div>
-          )}
-
-          {/* Connect With Us */}
-          {settings.footer_show_social && socials.length > 0 && (
-            <div>
-              <FooterHeading>{settings.footer_social_title}</FooterHeading>
-              <div className="flex flex-wrap gap-2.5 mt-5">
-                {socials.map(({ key, label, path, url }) => (
-                  <a key={key} href={url ?? '#'} target="_blank" rel="noopener noreferrer" aria-label={label}
-                    className="h-10 w-10 rounded-xl flex items-center justify-center bg-white/10 ring-1 ring-white/15 hover:bg-[#4472C4] hover:ring-transparent transition-all">
-                    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] fill-current" aria-hidden="true"><path d={path} /></svg>
-                  </a>
-                ))}
+              <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-3">
+                Connect With Us
+              </h4>
+              <div className="flex items-center gap-3">
+                {/* Twitter / X */}
+                <a
+                  href={settings.social_twitter_url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X"
+                  className="w-9 h-9 rounded-full bg-white text-[#16A34A] flex items-center justify-center hover:bg-zinc-100 transition-colors shadow-sm"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zM17.083 19.77h1.833L7.084 4.126H5.117z" /></svg>
+                </a>
+                {/* Facebook */}
+                <a
+                  href={settings.social_facebook_url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="w-9 h-9 rounded-full bg-white text-[#16A34A] flex items-center justify-center hover:bg-zinc-100 transition-colors shadow-sm"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                </a>
+                {/* Instagram */}
+                <a
+                  href={settings.social_instagram_url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="w-9 h-9 rounded-full bg-white text-[#16A34A] flex items-center justify-center hover:bg-zinc-100 transition-colors shadow-sm"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></svg>
+                </a>
               </div>
             </div>
-          )}
+
+            <div>
+              <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-3">
+                Secured By
+              </h4>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* AWS badge */}
+                <div className="bg-white text-zinc-900 px-3 py-1.5 rounded text-[11px] font-extrabold flex items-center gap-1 shadow-sm">
+                  <span className="text-[#FF9900]">aws</span>
+                </div>
+                {/* PCI DSS badge */}
+                <div className="bg-white text-emerald-700 px-3 py-1.5 rounded text-[11px] font-extrabold flex items-center gap-1 shadow-sm">
+                  <span>PCI DSS</span>
+                  <span className="text-[9px] font-normal text-zinc-600">CERTIFIED</span>
+                </div>
+                {/* Sectigo badge */}
+                <div className="bg-white text-emerald-800 px-3 py-1.5 rounded text-[11px] font-extrabold flex items-center gap-1 shadow-sm">
+                  <span className="text-emerald-600">SECURED BY</span>
+                  <span>SECTIGO</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 4: Accepted Payment & App Download Badges */}
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-3">
+                Accepted
+              </h4>
+              <div className="flex items-center gap-2">
+                {/* VISA badge */}
+                <div className="bg-white text-[#1A1F71] px-3 py-1.5 rounded font-black italic text-sm shadow-sm">
+                  VISA
+                </div>
+                {/* Mastercard badge */}
+                <div className="bg-white px-3 py-1.5 rounded flex items-center gap-0.5 shadow-sm">
+                  <div className="w-4 h-4 rounded-full bg-[#EB001B]" />
+                  <div className="w-4 h-4 rounded-full bg-[#F79E1B] -ml-2 opacity-90" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="space-y-2 max-w-[170px]">
+                {/* Google Play Button */}
+                <a
+                  href="#"
+                  className="flex items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-white/20 hover:bg-zinc-900 transition-colors shadow-sm"
+                >
+                  <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M3 20.5v-17c0-.83.67-1.5 1.5-1.5.35 0 .68.12.95.34l12.4 9.1-3.6 2.65L3 20.5z" /></svg>
+                  <div className="text-[9px] leading-tight">
+                    <span className="block text-white/70">GET IT ON</span>
+                    <span className="font-bold text-xs">Google Play</span>
+                  </div>
+                </a>
+
+                {/* App Store Button */}
+                <a
+                  href="#"
+                  className="flex items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-white/20 hover:bg-zinc-900 transition-colors shadow-sm"
+                >
+                  <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.66-.8 1.11-1.92.99-3.04-.96.04-2.13.64-2.82 1.44-.61.71-1.15 1.86-1.01 2.96 1.07.08 2.18-.56 2.84-1.36z" /></svg>
+                  <div className="text-[9px] leading-tight">
+                    <span className="block text-white/70">Download on the</span>
+                    <span className="font-bold text-xs">App Store</span>
+                  </div>
+                </a>
+
+                {/* AppGallery Button */}
+                <a
+                  href="#"
+                  className="flex items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-white/20 hover:bg-zinc-900 transition-colors shadow-sm"
+                >
+                  <svg className="w-5 h-5 fill-current text-red-500 shrink-0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /></svg>
+                  <div className="text-[9px] leading-tight">
+                    <span className="block text-white/70">EXPLORE IT ON</span>
+                    <span className="font-bold text-xs">AppGallery</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs opacity-75">
-          <p>{settings.footer_copyright_text}</p>
-          <p className="flex gap-4">
-            <Link href="/privacy" className="hover:opacity-100 hover:text-white">Privacy</Link>
-            <Link href="/terms" className="hover:opacity-100 hover:text-white">Terms</Link>
+        {/* Bottom copyright notice */}
+        <div className="mt-12 pt-6 border-t border-white/20 text-[11px] text-white/80 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p>
+            By clicking &quot;Accept all cookies&quot;, you agree Car Workshop can store cookies on your device and disclose information in accordance with our policy.
           </p>
+          <div className="flex gap-4 shrink-0 font-medium">
+            <Link href="/privacy" className="hover:underline hover:text-white">Privacy Policy</Link>
+            <Link href="/terms" className="hover:underline hover:text-white">Terms of Service</Link>
+          </div>
         </div>
       </div>
     </footer>
-  )
-}
-
-export function FooterHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 className="relative font-bold text-sm uppercase tracking-wider pb-2.5 after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-10 after:rounded-full after:bg-[#E8601C]">
-      {children}
-    </h3>
   )
 }
