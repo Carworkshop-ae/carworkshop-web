@@ -137,44 +137,31 @@ export async function findDubaiBrandsForFooter(): Promise<FooterBrandLink[]> {
   try {
     const supabase = createPublicSupabase()
 
-    // 1. Fetch published brand template pages for state = Dubai
+    // 1. Fetch published brand template pages from generated_pages
     const { data: pageData } = await supabase
       .from('generated_pages')
-      .select('slug, brand_id, brands ( name )')
+      .select('slug, brand_id, brands ( name, status )')
       .eq('status', 'published')
       .eq('template_type', 'brand')
-      .eq('state', 'Dubai')
       .not('brand_id', 'is', null)
       .limit(500)
 
-    const pageBrandLinks: FooterBrandLink[] = (pageData as unknown as Array<{ slug: string; brands: { name: string } | null }>)
-      ?.filter((r): r is { slug: string; brands: { name: string } } => !!r.brands)
+    const pageBrandLinks: FooterBrandLink[] = (pageData as unknown as Array<{ slug: string; brands: { name: string; status?: string } | null }>)
+      ?.filter((r): r is { slug: string; brands: { name: string; status?: string } } => !!r.brands && (r.brands.status === 'published' || !r.brands.status))
       .map(r => ({
         name: r.brands.name,
         slug: r.slug.replace(/^\//, ''),
       })) ?? []
 
-    // 2. Fetch all brands in database
-    const { data: brandsData } = await supabase
-      .from('brands')
-      .select('name, slug')
-      .order('name', { ascending: true })
-
-    const tableBrandLinks: FooterBrandLink[] = (brandsData ?? []).map(b => {
-      const cleanBrandSlug = b.slug.replace(/^dubai\//, '').replace(/^\//, '')
-      return { name: b.name, slug: `dubai/${cleanBrandSlug}` }
-    })
-
-    // Merge and deduplicate by brand name
-    const map = new Map<string, FooterBrandLink>()
-    for (const b of pageBrandLinks) {
-      if (!map.has(b.name.toLowerCase())) map.set(b.name.toLowerCase(), b)
-    }
-    for (const b of tableBrandLinks) {
-      if (!map.has(b.name.toLowerCase())) map.set(b.name.toLowerCase(), b)
+    if (pageBrandLinks.length > 0) {
+      const map = new Map<string, FooterBrandLink>()
+      for (const b of pageBrandLinks) {
+        if (!map.has(b.name.toLowerCase())) map.set(b.name.toLowerCase(), b)
+      }
+      return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
     }
 
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
+    return []
   } catch {
     return []
   }

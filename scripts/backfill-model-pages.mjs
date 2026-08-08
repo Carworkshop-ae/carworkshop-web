@@ -33,11 +33,9 @@ for (const m of models) {
   const b = brandById.get(m.brand_id)
   if (!b) continue
   rows.push({
-    page_type: 'model',
+    template_type: 'brand_model',
     brand_id: b.id,
     model_id: m.id,
-    service_id: null,
-    location_id: null,
     slug: `${b.slug}/${m.slug}`,
     h1: `${b.name} ${m.name} Service & Repair in UAE`,
     meta_title: clip(`${b.name} ${m.name} Service in UAE | CarWorkshop.ae`, 60),

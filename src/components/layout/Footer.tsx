@@ -8,17 +8,6 @@ interface FooterProps {
   brandsOverride?: FooterBrandLink[]
 }
 
-const DEFAULT_DUBAI_BRANDS = [
-  'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW',
-  'Bugatti', 'Cadillac', 'Chevrolet', 'Citroen', 'Dodge', 'Ferrari',
-  'Fiat', 'Ford', 'Geely', 'GMC', 'Honda', 'Hummer',
-  'Hyundai', 'Infiniti', 'Jaguar', 'Jeep', 'Kia', 'Lamborghini',
-  'Land Rover', 'Lexus', 'Lincoln', 'Maserati', 'Mazda', 'McLaren',
-  'Mercedes', 'MG', 'Mini', 'Mitsubishi', 'Nissan', 'Opel',
-  'Peugeot', 'Porsche', 'Renault', 'Rolls Royce', 'Skoda', 'Subaru',
-  'Suzuki', 'Toyota', 'Volkswagen', 'Volvo',
-].sort((a, b) => a.localeCompare(b))
-
 const DEFAULT_NAV = [
   { label: 'Home', href: '/' },
   { label: 'How It Works', href: '/#how-it-works' },
@@ -38,17 +27,11 @@ export async function Footer({ settings, brandsOverride }: FooterProps) {
     dbBrands = await findDubaiBrandsForFooter()
   }
 
-  // Format brand list to guarantee ascending order (A-Z)
-  const brandsList = (dbBrands.length > 0
-    ? dbBrands.map(b => ({
-        name: b.name.toLowerCase().includes('service') ? b.name : `${b.name} Service`,
-        href: b.slug.startsWith('/') ? b.slug : `/${b.slug}`,
-      }))
-    : DEFAULT_DUBAI_BRANDS.map(name => ({
-        name: `${name} Service`,
-        href: `/dubai/${name.toLowerCase().replace(/\s+/g, '-')}`,
-      }))
-  ).sort((a, b) => a.name.localeCompare(b.name))
+  // Format brand list to guarantee ascending order (A-Z) — only published by admin from admin portal
+  const brandsList = dbBrands.map(b => ({
+    name: b.name.toLowerCase().includes('service') ? b.name : `${b.name} Service`,
+    href: b.slug.startsWith('/') ? b.slug : `/${b.slug}`,
+  })).sort((a, b) => a.name.localeCompare(b.name))
 
   const customLinks = settings.footer_custom_links ?? []
   const quickNavLinks = customLinks.length > 0
@@ -57,74 +40,36 @@ export async function Footer({ settings, brandsOverride }: FooterProps) {
 
   const bgColor = settings.footer_background_color || '#161F2E'
   const textColor = settings.footer_text_color || '#FFFFFF'
-  const phone = settings.footer_business_phone || '+971501234567'
-  const phoneTel = phone.replace(/[^0-9+]/g, '')
-  const email = settings.footer_business_email || 'info@carworkshop.ae'
-  const address = settings.footer_business_address || 'Al Quoz Industrial Area, Dubai, UAE'
 
   return (
     <footer style={{ backgroundColor: bgColor, color: textColor }} role="contentinfo" className="relative overflow-hidden font-sans border-t border-white/10">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         
-        {/* Tier 1: Brands We Service (6-column responsive grid in ascending A-Z order) */}
-        <div className="pb-10 mb-10 border-b border-white/15">
-          <h3 className="text-xl font-bold mb-6 text-white tracking-tight">
-            Brands We Service
-          </h3>
-          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2.5 text-xs">
-            {brandsList.map((brand, idx) => (
-              <li key={`brand-${idx}`}>
-                <Link
-                  href={brand.href}
-                  className="hover:underline opacity-90 hover:opacity-100 transition-opacity whitespace-nowrap block truncate text-white/90 hover:text-white"
-                >
-                  {brand.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Tier 2: 3 Main Columns (Business Info, Quick Nav, Connect With Us) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 text-xs">
-          
-          {/* Column 1: Business Information */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
-              {settings.footer_business_title || 'BUSINESS INFORMATION'}
-            </h4>
-            <p className="leading-relaxed opacity-90 text-white/90">
-              {address}
-            </p>
-            <p className="opacity-90 font-medium text-white/90">
-              PO Box : 333761
-            </p>
-
-            {/* Red CALL 800 BOOKING CTA button */}
-            <div className="pt-2 pb-1">
-              <a
-                href={`tel:${phoneTel}`}
-                className="inline-flex items-center justify-center bg-[#E52E2E] hover:bg-[#CC2525] text-white font-extrabold px-6 py-2.5 rounded-md shadow-md text-sm uppercase tracking-wider transition-all transform hover:scale-[1.02]"
-              >
-                CALL 800 BOOKING
-              </a>
-            </div>
-
-            <p className="opacity-90">
-              <span className="font-semibold">Business Phone:</span> {phone}
-            </p>
-            <p className="opacity-90">
-              <span className="font-semibold">Phone:</span> (04) 703 8999
-            </p>
-            <p className="opacity-90">
-              <span className="font-semibold">Email:</span>{' '}
-              <a href={`mailto:${email}`} className="hover:underline">
-                {email}
-              </a>
-            </p>
+        {/* Tier 1: Brands We Service (Only shown if published by admin from admin portal) */}
+        {brandsList.length > 0 && (
+          <div className="pb-10 mb-10 border-b border-white/15">
+            <h3 className="text-xl font-bold mb-6 text-white tracking-tight">
+              Brands We Service
+            </h3>
+            <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2.5 text-xs">
+              {brandsList.map((brand, idx) => (
+                <li key={`brand-${idx}`}>
+                  <Link
+                    href={brand.href}
+                    className="hover:underline opacity-90 hover:opacity-100 transition-opacity whitespace-nowrap block truncate text-white/90 hover:text-white"
+                  >
+                    {brand.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
+        )}
 
-          {/* Column 2: Quick Navigation Links */}
+        {/* Tier 2: 2 Main Columns (Quick Navigation Links, Connect With Us) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 text-xs">
+          
+          {/* Column 1: Quick Navigation Links */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold uppercase tracking-wider text-white">
               {settings.footer_quick_nav_title || 'QUICK NAVIGATION LINKS'}
@@ -140,7 +85,7 @@ export async function Footer({ settings, brandsOverride }: FooterProps) {
             </ul>
           </div>
 
-          {/* Column 3: Connect With Us */}
+          {/* Column 2: Connect With Us */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold uppercase tracking-wider text-white">
               {settings.footer_social_title || 'CONNECT WITH US'}

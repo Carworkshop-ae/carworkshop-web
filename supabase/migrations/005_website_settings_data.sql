@@ -8,17 +8,17 @@ INSERT INTO website_settings (key, value) VALUES
 
 -- CONTACT FLOATING BUTTONS
 ('whatsapp_enabled', 'true'),
-('whatsapp_number', '"+971501234567"'),
+('whatsapp_number', '"+97180022797"'),
 ('whatsapp_message', '"Hi, I would like to book a car service"'),
 ('whatsapp_position', '"bottom-right"'),
 
 ('call_enabled', 'true'),
-('call_number', '"+971501234567"'),
+('call_number', '"+97180022797"'),
 ('call_position', '"bottom-left"'),
 
 -- HEADER
 ('header_logo_url', 'null'),
-('header_phone_number', '"+971501234567"'),
+('header_phone_number', '"+97180022797"'),
 ('header_phone_visible', 'true'),
 ('header_whatsapp_visible', 'true'),
 ('header_cta_text', '"Book Now"'),
@@ -69,8 +69,8 @@ INSERT INTO website_settings (key, value) VALUES
 ('social_twitter_url', 'null'),
 
 -- ANNOUNCEMENT BAR
-('announcement_bar_enabled', 'false'),
-('announcement_bar_text', '"Free pickup & delivery on all bookings this month!"'),
+('announcement_bar_enabled', 'true'),
+('announcement_bar_text', '"Website Under Construction — We’re currently building CarWorkshop.ae. Online bookings are not available yet. Please check back soon!"'),
 ('announcement_bar_bg_color', '"#E8601C"'),
 ('announcement_bar_text_color', '"#FFFFFF"'),
 ('announcement_bar_link', 'null')
