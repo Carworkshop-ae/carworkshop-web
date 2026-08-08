@@ -1,8 +1,13 @@
 'use client'
 
-import { useId, useState, useRef, useEffect, useMemo } from 'react'
+import { useId, useState, useRef, useEffect, useMemo, useCallback, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { CharCounter } from './CharCounter'
+
+const emptySubscribe = () => () => {}
+function useIsMounted() {
+  return useSyncExternalStore(emptySubscribe, () => true, () => false)
+}
 
 const INPUT_BASE = 'w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 bg-white focus:outline-none focus:ring-2 focus:ring-[#4472C4] focus:border-transparent transition-all duration-150 disabled:bg-zinc-50 disabled:text-zinc-400'
 
@@ -63,7 +68,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 export function AdminSelect({ label, required, hint, options, className = '', id, value, onChange, disabled, name }: SelectProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const [mounted, setMounted] = useState(false)
+  const mounted = useIsMounted()
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -77,10 +82,6 @@ export function AdminSelect({ label, required, hint, options, className = '', id
     maxHeight: number
   } | null>(null)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
   const selectedOption = useMemo(() => {
     return options.find(o => String(o.value) === String(value)) || options[0]
   }, [options, value])
@@ -91,7 +92,7 @@ export function AdminSelect({ label, required, hint, options, className = '', id
     return options.filter(o => o.label.toLowerCase().includes(q) || String(o.value).toLowerCase().includes(q))
   }, [options, search])
 
-  const updateCoords = () => {
+  const updateCoords = useCallback(() => {
     if (!buttonRef.current) return
     const rect = buttonRef.current.getBoundingClientRect()
     const viewportHeight = window.innerHeight
@@ -117,7 +118,7 @@ export function AdminSelect({ label, required, hint, options, className = '', id
       placeAbove,
       maxHeight,
     })
-  }
+  }, [options.length])
 
   // Recalculate position when open or on scroll/resize
   useEffect(() => {
@@ -135,7 +136,7 @@ export function AdminSelect({ label, required, hint, options, className = '', id
       window.removeEventListener('scroll', handleScrollOrResize, true)
       window.removeEventListener('resize', handleScrollOrResize)
     }
-  }, [open, options.length])
+  }, [open, updateCoords])
 
   // Recalculate after dropdown element mounts if placed above
   useEffect(() => {
