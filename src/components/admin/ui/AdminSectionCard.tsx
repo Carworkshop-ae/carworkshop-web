@@ -22,9 +22,9 @@ export function AdminSectionCard({ title, description, visible, onVisibleChange,
 
   if (headerColor) {
     return (
-      <section className="bg-white rounded-lg border border-zinc-200 shadow-sm overflow-hidden">
+      <section className="bg-white rounded-lg border border-zinc-200 shadow-sm">
         <header
-          className="flex items-center justify-between gap-3 px-4 py-2.5 cursor-pointer select-none"
+          className="flex items-center justify-between gap-3 px-4 py-2.5 cursor-pointer select-none rounded-t-lg"
           style={{ backgroundColor: headerColor }}
           onClick={() => setOpen(o => !o)}
         >
