@@ -3,7 +3,6 @@ import { Header } from '@/components/layout/Header'
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton'
 import { CallButton } from '@/components/layout/CallButton'
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar'
-import { MobileCtaBar } from '@/components/layout/MobileCtaBar'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { getSettings } from '@/lib/hooks/useSettings'
 
@@ -41,7 +40,6 @@ export default async function PublicLayout({ children }: { children: React.React
       <main>{children}</main>
       <WhatsAppButton settings={settings} />
       <CallButton settings={settings} />
-      <MobileCtaBar settings={settings} />
       <CookieBanner />
     </>
   )
