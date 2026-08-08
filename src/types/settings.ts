@@ -141,7 +141,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   site_favicon_url: null,
 
   header_logo_url: null,
-  header_phone_number: '+971501234567',
+  header_phone_number: '+971 800 CARWS',
   header_phone_visible: true,
   header_whatsapp_visible: true,
   header_cta_text: 'Book Now',
@@ -161,12 +161,12 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   hero_stat_4_label: 'Coverage',
 
   whatsapp_enabled: true,
-  whatsapp_number: '+971501234567',
+  whatsapp_number: '+97180022797',
   whatsapp_message: 'Hi, I would like to book a car service',
   whatsapp_position: 'bottom-right',
 
   call_enabled: true,
-  call_number: '+971501234567',
+  call_number: '+97180022797',
   call_position: 'bottom-left',
 
   nav_items: [
@@ -205,7 +205,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footer_show_social: true,
   footer_business_title: 'Business Information',
   footer_business_address: 'Al Quoz Industrial Area, Dubai, UAE',
-  footer_business_phone: '+971501234567',
+  footer_business_phone: '+971 800 CARWS',
   footer_business_phone2: '',
   footer_business_email: 'info@carworkshop.ae',
   footer_quick_nav_title: 'Quick Navigation',
@@ -226,8 +226,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   social_twitter_url: null,
   social_google_business_url: null,
 
-  announcement_bar_enabled: false,
-  announcement_bar_text: 'Free pickup & delivery on all bookings this month!',
+  announcement_bar_enabled: true,
+  announcement_bar_text: 'Website Under Construction — We’re currently building CarWorkshop.ae. Online bookings are not available yet. Please check back soon!',
   announcement_bar_bg_color: '#E8601C',
   announcement_bar_text_color: '#FFFFFF',
   announcement_bar_link: null,

@@ -34,9 +34,11 @@ export default async function PublicLayout({ children }: { children: React.React
       {gtm && (
         <Script id="gtm-init" strategy="afterInteractive">{`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtm}');`}</Script>
       )}
-      <AnnouncementBar settings={settings} />
-      <Header settings={settings} />
-      <main className={settings.header_sticky ? 'pt-16' : ''}>{children}</main>
+      <div className={settings.header_sticky ? 'sticky top-0 z-50' : 'relative z-50'}>
+        <AnnouncementBar settings={settings} />
+        <Header settings={settings} />
+      </div>
+      <main>{children}</main>
       <WhatsAppButton settings={settings} />
       <CallButton settings={settings} />
       <MobileCtaBar settings={settings} />

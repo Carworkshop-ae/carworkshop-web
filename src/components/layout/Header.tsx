@@ -64,7 +64,7 @@ export function Header({ settings }: HeaderProps) {
   const phoneTel = phone.replace(/[^0-9+]/g, '')
   const waNumber = settings.whatsapp_number.replace(/[^0-9]/g, '')
 
-  const positionClass = settings.header_sticky ? 'fixed top-0 left-0 right-0' : 'relative'
+  const positionClass = 'relative w-full'
   const isActive = (link: string) => link !== '/' ? pathname.startsWith(link) : pathname === '/'
 
   // A nav item shows a dropdown only if it has custom children.
