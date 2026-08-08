@@ -22,13 +22,6 @@ if (!url || !key) {
 
 const sb = createClient(url, key, { auth: { persistSession: false } })
 
-function formatTitle(str) {
-  return str
-    .split('-')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
-}
-
 const rawData = readFileSync(new URL('../supabase/migrations/018_seed_full_vehicle_dataset.sql', import.meta.url), 'utf8')
 
 async function run() {
