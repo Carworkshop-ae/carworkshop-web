@@ -241,7 +241,11 @@ export async function getRelatedSections(page: GeneratedPageRow, brandName: stri
       return { services: toLinks(services), models: toLinks(models), locations: toLocationLinks(locations) }
     }
     case 'brand_service': {
-      let services = await findPublished({ template_type: 'brand_model_service', brand_id: page.brand_id, sameState: page.state })
+      // Same-brand cross-sell first: sibling brand_service pages for this
+      // brand (excluding this page itself), then brand-scoped model
+      // variants, only falling to brand-agnostic general services last.
+      let services = (await findPublished({ template_type: 'brand_service', brand_id: page.brand_id, sameState: page.state })).filter(r => r.slug !== page.slug)
+      if (services.length === 0) services = await findPublished({ template_type: 'brand_model_service', brand_id: page.brand_id, sameState: page.state })
       if (services.length === 0) services = await findPublished({ template_type: 'general_service', sameState: page.state })
       const locations = await findPublished({ template_type: 'brand_service', brand_id: page.brand_id, excludeState: page.state })
       return { ...empty, services: toLinks(services), locations: toLocationLinks(locations) }
