@@ -643,6 +643,7 @@ export type Database = {
           meta_keyword: string | null
           meta_title: string
           model_id: string | null
+          priority: number | null
           seo_json: Json
           short_description: string | null
           slug: string
@@ -671,6 +672,7 @@ export type Database = {
           meta_keyword?: string | null
           meta_title: string
           model_id?: string | null
+          priority?: number | null
           seo_json?: Json
           short_description?: string | null
           slug: string
@@ -699,6 +701,7 @@ export type Database = {
           meta_keyword?: string | null
           meta_title?: string
           model_id?: string | null
+          priority?: number | null
           seo_json?: Json
           short_description?: string | null
           slug?: string

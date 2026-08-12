@@ -4,7 +4,7 @@ import { getActingUser } from '@/lib/auth-guard'
 import { sanitizeHTML, stripHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
 import { revalidateGeneratedPage } from '@/lib/revalidate'
-import { nextStatusOnSave, statusForRoleOnSave } from '@/lib/approval'
+import { nextStatusOnSave, statusForRoleOnSave, priorityForRoleOnSave } from '@/lib/approval'
 import { SeoPageCreateSchema } from '@/lib/schemas/seo-page'
 import type { ApprovalStatus, PageContent } from '@/types'
 import type { Json } from '@/types/database'
@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
       .insert({
         ...rest,
         status: statusForRoleOnSave(acting.role, rest.status),
+        priority: priorityForRoleOnSave(acting.role, rest.priority),
         meta_description: rest.meta_description ?? '',
         short_description: short_description ? stripHTML(short_description) : null,
         arabic_short_description: arabic_short_description ? sanitizeHTML(arabic_short_description) : null,

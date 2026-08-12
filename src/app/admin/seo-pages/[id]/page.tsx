@@ -35,6 +35,7 @@ export default async function EditSeoPagePage({ params }: { params: Promise<{ id
     complete_description: content.main_content ?? '',
     status: page.status,
     display_in_footer: page.display_in_footer ?? false,
+    priority: page.priority ?? null,
     content_json: content,
   }
 

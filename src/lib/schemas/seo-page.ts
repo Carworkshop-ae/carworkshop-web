@@ -29,6 +29,7 @@ export const SeoPageUpdateSchema = z.object({
   complete_description: z.string().max(100000).nullable().optional(),
   status: z.enum(['draft', 'published', 'archived']).optional(),
   display_in_footer: z.boolean().optional(),
+  priority: z.number().int().min(1).max(8).nullable().optional(),
   content_json: z.record(z.string(), z.unknown()).nullable().optional(),
 })
 

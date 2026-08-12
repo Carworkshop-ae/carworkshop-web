@@ -193,10 +193,11 @@ export async function findHomepageServices(state: string, limit = 8): Promise<Re
     const supabase = createPublicSupabase()
     const { data } = await supabase
       .from('generated_pages')
-      .select('h1, slug, short_description, starting_price, content_json')
+      .select('h1, slug, short_description, starting_price, content_json, priority')
       .eq('status', 'published')
       .eq('template_type', 'general_service')
       .eq('state', state)
+      .order('priority', { ascending: true, nullsFirst: false })
       .limit(limit)
     return (data ?? []).map(r => ({ h1: r.h1, slug: r.slug, short_description: r.short_description, starting_price: r.starting_price, icon: (r.content_json as PageContent | null)?.icon ?? null }))
   } catch {

@@ -4,7 +4,7 @@ import { getActingUser } from '@/lib/auth-guard'
 import { sanitizeHTML, stripHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
 import { revalidateGeneratedPage } from '@/lib/revalidate'
-import { nextStatusOnSave, statusForRoleOnSave, SUBMITTER_ROLES } from '@/lib/approval'
+import { nextStatusOnSave, statusForRoleOnSave, priorityForRoleOnSave, SUBMITTER_ROLES } from '@/lib/approval'
 import { SeoPageUpdateSchema } from '@/lib/schemas/seo-page'
 import type { PageContent } from '@/types'
 
@@ -56,10 +56,13 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     }
 
     let statusUpdate: Record<string, unknown> = { status: rest.status }
+    let priorityUpdate: Record<string, unknown> = { priority: rest.priority }
     if (SUBMITTER_ROLES.includes(acting.role)) {
-      const { data: existing } = await service.from('generated_pages').select('status').eq('id', id).single()
-      const forced = statusForRoleOnSave(acting.role, rest.status, existing?.status as 'draft' | 'published' | 'archived' | undefined)
-      statusUpdate = forced !== undefined ? { status: forced } : {}
+      const { data: existing } = await service.from('generated_pages').select('status, priority').eq('id', id).single()
+      const forcedStatus = statusForRoleOnSave(acting.role, rest.status, existing?.status as 'draft' | 'published' | 'archived' | undefined)
+      statusUpdate = forcedStatus !== undefined ? { status: forcedStatus } : {}
+      const forcedPriority = priorityForRoleOnSave(acting.role, rest.priority, existing?.priority as number | null | undefined)
+      priorityUpdate = forcedPriority !== undefined ? { priority: forcedPriority } : {}
     }
 
     const { data, error } = await service
@@ -67,6 +70,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       .update({
         ...rest,
         ...statusUpdate,
+        ...priorityUpdate,
         ...(short_description !== undefined ? { short_description: short_description ? stripHTML(short_description) : null } : {}),
         ...(arabic_short_description !== undefined ? { arabic_short_description: arabic_short_description ? sanitizeHTML(arabic_short_description) : null } : {}),
         ...(arabic_complete_description !== undefined ? { arabic_complete_description: arabic_complete_description ? sanitizeHTML(arabic_complete_description) : null } : {}),

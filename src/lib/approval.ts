@@ -24,6 +24,13 @@ export function statusForRoleOnSave(role: UserRole, requestedStatus: ContentStat
   return currentStatus ?? 'draft'
 }
 
+// Homepage ranking is an approver-only decision, same reasoning as status:
+// submitters' writes to `priority` are dropped, existing value is kept as-is.
+export function priorityForRoleOnSave(role: UserRole, requestedPriority: number | null | undefined, currentPriority?: number | null): number | null | undefined {
+  if (canApprove(role)) return requestedPriority ?? currentPriority
+  return currentPriority ?? null
+}
+
 export const APPROVAL_ACTIONS = ['approve', 'reject', 'resubmission_required'] as const
 export type ApprovalAction = (typeof APPROVAL_ACTIONS)[number]
 

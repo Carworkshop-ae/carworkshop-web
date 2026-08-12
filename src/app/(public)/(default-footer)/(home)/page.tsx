@@ -88,7 +88,7 @@ export default async function HomePage() {
 
       {vis(c.trust_bar) && c.trust_bar?.stats && c.trust_bar.stats.length > 0 && <TrustBar items={c.trust_bar.stats} />}
 
-      {vis(c.services) && <Reveal><ServiceCardsSection services={services} title={c.services?.heading || 'Popular Car Services'} subtitle="From routine maintenance to complex repairs — we cover it all." /></Reveal>}
+      {vis(c.services) && <Reveal><ServiceCardsSection services={services} title={c.services?.heading || 'Popular Car Services'} subtitle="From routine maintenance to complex repairs — we cover it all." viewMoreHref="/dubai/services" /></Reveal>}
       {vis(c.how_it_works) && <Reveal><HowItWorks heading={c.how_it_works?.heading} steps={c.how_it_works?.steps} /></Reveal>}
       {vis(c.why_choose_us) && <Reveal><WhyChooseUs heading={c.why_choose_us?.heading} items={c.why_choose_us?.items} /></Reveal>}
       {vis(c.locations) && <Reveal><LocationsSection locations={activeStates} title={c.locations?.heading || 'Find Us Across UAE'} /></Reveal>}
