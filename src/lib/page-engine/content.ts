@@ -261,8 +261,13 @@ export async function getRelatedSections(page: GeneratedPageRow, brandName: stri
       return { ...empty, services: toLinks(services), locations: toLocationLinks(locations) }
     }
     case 'brand_model_service': {
+      // Sibling model-specific services first, then fall back to the
+      // parent brand's brand_service pages, general_service as last resort.
+      let services = (await findPublished({ template_type: 'brand_model_service', brand_id: page.brand_id, model_id: page.model_id, sameState: page.state })).filter(r => r.slug !== page.slug)
+      if (services.length === 0) services = await findPublished({ template_type: 'brand_service', brand_id: page.brand_id, sameState: page.state })
+      if (services.length === 0) services = await findPublished({ template_type: 'general_service', sameState: page.state })
       const locations = await findPublished({ template_type: 'brand_model_service', brand_id: page.brand_id, model_id: page.model_id, excludeState: page.state })
-      return { ...empty, locations: toLocationLinks(locations) }
+      return { ...empty, services: toLinks(services), locations: toLocationLinks(locations) }
     }
     case 'general_service': {
       const locations = await findPublished({ template_type: 'general_service', excludeState: page.state })
