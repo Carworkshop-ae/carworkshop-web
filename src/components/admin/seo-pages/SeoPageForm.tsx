@@ -31,6 +31,7 @@ export interface SeoPageFormValues {
   complete_description: string
   status: string
   display_in_footer: boolean
+  priority: number | null
   content_json: PageContent
 }
 
@@ -38,7 +39,7 @@ export const EMPTY_SEO_PAGE: SeoPageFormValues = {
   country: 'AE', state: '', template_type: 'general_service', h1: '', arabic_title: '', slug: '',
   meta_title: '', meta_keyword: '', meta_description: '',
   brand_id: '', model_id: '', starting_price: '', short_description: '', complete_description: '',
-  status: 'draft', display_in_footer: false,
+  status: 'draft', display_in_footer: false, priority: null,
   content_json: {},
 }
 
@@ -162,6 +163,7 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
       complete_description: v.complete_description || null,
       status: v.status,
       display_in_footer: v.display_in_footer,
+      priority: v.template_type === 'general_service' ? v.priority : null,
       content_json: v.content_json,
     }
     if (!pageId && !payload.meta_description) payload.meta_description = v.h1
@@ -301,6 +303,22 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
             <AdminSelect label="Publish Status" required value={v.status} onChange={e => set('status', e.target.value)} options={[{ value: 'published', label: 'Active' }, { value: 'draft', label: 'Inactive' }, { value: 'archived', label: 'Archived' }]} />
           )}
           <AdminSelect label="Display In Footer?" required value={v.display_in_footer ? 'yes' : 'no'} onChange={e => set('display_in_footer', e.target.value === 'yes')} options={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]} />
+          {v.template_type === 'general_service' && (
+            isSEOEditor ? (
+              <div>
+                <AdminLabel>Homepage Priority</AdminLabel>
+                <p className="text-sm text-zinc-500 border border-[#E5E7EB] rounded px-3 py-2 bg-zinc-50">{v.priority ? `#${v.priority}` : 'Not set'} — admin only</p>
+              </div>
+            ) : (
+              <AdminSelect
+                label="Homepage Priority"
+                hint="Ranks this page in the homepage 'Our Services' list (1 = first, top 8 shown)"
+                value={v.priority ? String(v.priority) : ''}
+                onChange={e => set('priority', e.target.value ? Number(e.target.value) : null)}
+                options={[{ value: '', label: 'None' }, ...Array.from({ length: 8 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))]}
+              />
+            )
+          )}
         </div>
       </AdminSectionCard>
 

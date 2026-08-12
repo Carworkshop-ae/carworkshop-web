@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ServiceFeatureCard } from '@/components/sections/ServiceFeatureCard'
 import type { RelatedLink } from '@/lib/page-engine/content'
 
@@ -5,6 +6,7 @@ interface ServiceCardsSectionProps {
   services: RelatedLink[]
   title?: string
   subtitle?: string
+  viewMoreHref?: string
 }
 
 // Same plain icon+title card used on Brand/Model pages (ServiceFeatureCard) —
@@ -13,6 +15,7 @@ export function ServiceCardsSection({
   services,
   title = 'Our Services',
   subtitle,
+  viewMoreHref,
 }: ServiceCardsSectionProps) {
   if (services.length === 0) return null
   return (
@@ -28,6 +31,17 @@ export function ServiceCardsSection({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
           {services.map(service => <ServiceFeatureCard key={service.slug} link={service} />)}
         </div>
+
+        {viewMoreHref && (
+          <div className="text-center mt-10">
+            <Link
+              href={viewMoreHref}
+              className="inline-flex items-center justify-center rounded-lg border border-[#4472C4] px-6 py-3 text-sm font-semibold text-[#4472C4] hover:bg-[#4472C4] hover:text-white transition-colors"
+            >
+              View More Services
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   )
