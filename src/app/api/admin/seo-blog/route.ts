@@ -4,7 +4,7 @@ import { getActingUser } from '@/lib/auth-guard'
 import { sanitizeHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
 import { revalidatePage } from '@/lib/revalidate'
-import { nextStatusOnSave } from '@/lib/approval'
+import { nextStatusOnSave, statusForRoleOnSave } from '@/lib/approval'
 import { SeoBlogCreateSchema } from '@/lib/schemas/seo-blog'
 
 // GET /api/admin/seo-blog — blog posts for the SEO Blog module.
@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
       .from('blog_posts')
       .insert({
         ...d,
+        status: statusForRoleOnSave(acting.role, d.status),
         content: d.content ? sanitizeHTML(d.content) : null,
         arabic_content: d.arabic_content ? sanitizeHTML(d.arabic_content) : null,
         approval_status: nextStatusOnSave(acting.role),

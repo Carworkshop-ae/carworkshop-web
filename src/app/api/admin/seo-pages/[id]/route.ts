@@ -4,7 +4,7 @@ import { getActingUser } from '@/lib/auth-guard'
 import { sanitizeHTML, stripHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
 import { revalidateGeneratedPage } from '@/lib/revalidate'
-import { nextStatusOnSave } from '@/lib/approval'
+import { nextStatusOnSave, statusForRoleOnSave, SUBMITTER_ROLES } from '@/lib/approval'
 import { SeoPageUpdateSchema } from '@/lib/schemas/seo-page'
 import type { PageContent } from '@/types'
 
@@ -55,10 +55,18 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       contentUpdate = { content_json: merged }
     }
 
+    let statusUpdate: Record<string, unknown> = { status: rest.status }
+    if (SUBMITTER_ROLES.includes(acting.role)) {
+      const { data: existing } = await service.from('generated_pages').select('status').eq('id', id).single()
+      const forced = statusForRoleOnSave(acting.role, rest.status, existing?.status as 'draft' | 'published' | 'archived' | undefined)
+      statusUpdate = forced !== undefined ? { status: forced } : {}
+    }
+
     const { data, error } = await service
       .from('generated_pages')
       .update({
         ...rest,
+        ...statusUpdate,
         ...(short_description !== undefined ? { short_description: short_description ? stripHTML(short_description) : null } : {}),
         ...(arabic_short_description !== undefined ? { arabic_short_description: arabic_short_description ? sanitizeHTML(arabic_short_description) : null } : {}),
         ...(arabic_complete_description !== undefined ? { arabic_complete_description: arabic_complete_description ? sanitizeHTML(arabic_complete_description) : null } : {}),

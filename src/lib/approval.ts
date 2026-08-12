@@ -16,6 +16,14 @@ export function nextStatusOnSave(role: UserRole): ApprovalStatus {
   return canApprove(role) ? 'approved' : 'pending'
 }
 
+// Submitters can never move a row's live-visibility status — their writes to
+// `status` are dropped, new rows always start `draft`. Approvers pass through.
+type ContentStatus = 'draft' | 'published' | 'archived'
+export function statusForRoleOnSave(role: UserRole, requestedStatus: ContentStatus | undefined, currentStatus?: ContentStatus): ContentStatus | undefined {
+  if (canApprove(role)) return requestedStatus ?? currentStatus
+  return currentStatus ?? 'draft'
+}
+
 export const APPROVAL_ACTIONS = ['approve', 'reject', 'resubmission_required'] as const
 export type ApprovalAction = (typeof APPROVAL_ACTIONS)[number]
 

@@ -11,6 +11,7 @@ import { SERVICE_ICONS } from '@/lib/service-icons'
 import { COUNTRIES, STATES_BY_COUNTRY } from '@/lib/geo'
 import { generateSlug } from '@/lib/page-engine/slugify'
 import { TEMPLATES_REQUIRING_BRAND, TEMPLATES_REQUIRING_MODEL, type TemplateTypeValue } from '@/lib/schemas/seo-page'
+import { useActingRole } from '@/components/admin/seo-editor-ui'
 import type { PageContent } from '@/types'
 
 export interface SeoPageFormValues {
@@ -59,6 +60,7 @@ type SlugStatus = 'idle' | 'checking' | 'available' | 'taken'
 
 export function SeoPageForm({ pageId, initial, brands }: Props) {
   const router = useRouter()
+  const { isSEOEditor } = useActingRole()
   const [v, setV] = useState<SeoPageFormValues>(initial)
   const [models, setModels] = useState<Array<{ id: string; name: string }>>([])
   const [saving, setSaving] = useState(false)
@@ -290,7 +292,14 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
       {/* Section 3: DISPLAY INFORMATION */}
       <AdminSectionCard title="Display Information" headerColor="#22C55E">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AdminSelect label="Publish Status" required value={v.status} onChange={e => set('status', e.target.value)} options={[{ value: 'published', label: 'Active' }, { value: 'draft', label: 'Inactive' }, { value: 'archived', label: 'Archived' }]} />
+          {isSEOEditor ? (
+            <div>
+              <AdminLabel>Publish Status</AdminLabel>
+              <p className="text-sm text-zinc-500 border border-[#E5E7EB] rounded px-3 py-2 bg-zinc-50">Inactive — pending admin approval</p>
+            </div>
+          ) : (
+            <AdminSelect label="Publish Status" required value={v.status} onChange={e => set('status', e.target.value)} options={[{ value: 'published', label: 'Active' }, { value: 'draft', label: 'Inactive' }, { value: 'archived', label: 'Archived' }]} />
+          )}
           <AdminSelect label="Display In Footer?" required value={v.display_in_footer ? 'yes' : 'no'} onChange={e => set('display_in_footer', e.target.value === 'yes')} options={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]} />
         </div>
       </AdminSectionCard>
