@@ -8,6 +8,7 @@ import { AdminInput, AdminTextarea, AdminSelect, AdminLabel } from '@/components
 import { AdminButton } from '@/components/admin/ui/AdminButton'
 import { RichTextEditor } from '@/components/admin/RichTextEditor'
 import { COUNTRIES, STATES_BY_COUNTRY } from '@/lib/geo'
+import { useActingRole } from '@/components/admin/seo-editor-ui'
 
 export interface SeoBlogFormValues {
   country: string
@@ -49,6 +50,7 @@ interface Props {
 
 export function SeoBlogForm({ postId, initial }: Props) {
   const router = useRouter()
+  const { isSEOEditor } = useActingRole()
   const [v, setV] = useState<SeoBlogFormValues>(initial)
   const [saving, setSaving] = useState(false)
 
@@ -154,7 +156,14 @@ export function SeoBlogForm({ postId, initial }: Props) {
         <AdminInput label="Tags (Separate each points with semicolon (;) )" value={v.tags} onChange={e => set('tags', e.target.value)} />
         <AdminInput label="Tags Arabic (Separate each points with semicolon (;) )" dir="rtl" value={v.tags_ar} onChange={e => set('tags_ar', e.target.value)} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AdminSelect label="Publish Status" required value={v.status} onChange={e => set('status', e.target.value)} options={[{ value: 'published', label: 'Active' }, { value: 'draft', label: 'Inactive' }, { value: 'archived', label: 'Archived' }]} />
+          {isSEOEditor ? (
+            <div>
+              <AdminLabel>Publish Status</AdminLabel>
+              <p className="text-sm text-zinc-500 border border-[#E5E7EB] rounded px-3 py-2 bg-zinc-50">Inactive — pending admin approval</p>
+            </div>
+          ) : (
+            <AdminSelect label="Publish Status" required value={v.status} onChange={e => set('status', e.target.value)} options={[{ value: 'published', label: 'Active' }, { value: 'draft', label: 'Inactive' }, { value: 'archived', label: 'Archived' }]} />
+          )}
           <AdminSelect label="Is Featured?" value={v.is_featured ? 'yes' : 'no'} onChange={e => set('is_featured', e.target.value === 'yes')} options={[{ value: 'no', label: 'No' }, { value: 'yes', label: 'Yes' }]} />
         </div>
       </AdminSectionCard>

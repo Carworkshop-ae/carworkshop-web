@@ -4,7 +4,7 @@ import { getActingUser } from '@/lib/auth-guard'
 import { sanitizeHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
 import { revalidatePage } from '@/lib/revalidate'
-import { nextStatusOnSave } from '@/lib/approval'
+import { nextStatusOnSave, statusForRoleOnSave, SUBMITTER_ROLES } from '@/lib/approval'
 import { SeoBlogUpdateSchema } from '@/lib/schemas/seo-blog'
 
 interface RouteContext { params: Promise<{ id: string }> }
@@ -39,10 +39,19 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
     const d = parsed.data
     const service = createServiceClient()
+
+    let statusUpdate: Record<string, unknown> = { status: d.status }
+    if (SUBMITTER_ROLES.includes(acting.role)) {
+      const { data: existing } = await service.from('blog_posts').select('status').eq('id', id).single()
+      const forced = statusForRoleOnSave(acting.role, d.status, existing?.status as 'draft' | 'published' | 'archived' | undefined)
+      statusUpdate = forced !== undefined ? { status: forced } : {}
+    }
+
     const { data, error } = await service
       .from('blog_posts')
       .update({
         ...d,
+        ...statusUpdate,
         ...(d.content !== undefined ? { content: d.content ? sanitizeHTML(d.content) : null } : {}),
         ...(d.arabic_content !== undefined ? { arabic_content: d.arabic_content ? sanitizeHTML(d.arabic_content) : null } : {}),
         approval_status: nextStatusOnSave(acting.role),
