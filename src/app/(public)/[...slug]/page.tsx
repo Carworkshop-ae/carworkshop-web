@@ -120,7 +120,7 @@ export default async function GeneratedPage({ params }: Props) {
   const servicesSection = <ServiceCards title={servicesHeading} links={sections.services} viewAllHref={viewAllHref} />
   const contentSection = page.content_json?.main_content && (
     <section className="py-12 border-t border-hairline">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 rich-content">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 rich-content">
         <div dangerouslySetInnerHTML={{ __html: page.content_json.main_content }} />
       </div>
     </section>
