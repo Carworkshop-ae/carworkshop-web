@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getActingUser } from '@/lib/auth-guard'
-import { sanitizeHTML, stripHTML } from '@/lib/sanitize'
+import { stripHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
 import { revalidateGeneratedPage } from '@/lib/revalidate'
 import { nextStatusOnSave, statusForRoleOnSave, priorityForRoleOnSave, SUBMITTER_ROLES } from '@/lib/approval'
@@ -38,20 +38,16 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Invalid data', details: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
 
-    const { complete_description, short_description, content_json, ...rest } = parsed.data
+    const { short_description, content_json, ...rest } = parsed.data
 
     const service = createServiceClient()
 
-    // Complete Description + structured content_json fields all live in content_json — merge, don't clobber.
+    // Structured content_json fields live in content_json — merge, don't clobber.
     let contentUpdate: Record<string, unknown> = {}
-    if (complete_description !== undefined || content_json !== undefined) {
+    if (content_json !== undefined) {
       const { data: existing } = await service.from('generated_pages').select('content_json').eq('id', id).single()
       const current = (existing?.content_json ?? {}) as PageContent
-      const incoming = (content_json ?? {}) as PageContent
-      const merged: PageContent = { ...current, ...incoming }
-      if (complete_description !== undefined) {
-        merged.main_content = complete_description ? sanitizeHTML(complete_description) : null
-      }
+      const merged: PageContent = { ...current, ...content_json as PageContent }
       contentUpdate = { content_json: merged }
     }
 
