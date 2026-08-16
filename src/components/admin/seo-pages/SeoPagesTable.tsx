@@ -107,7 +107,10 @@ export function SeoPagesTable({ initialRows, brands, users, isApprover }: Props)
       body: JSON.stringify({ status: next }),
     })
     if (res.ok) {
-      setRows(rs => rs.map(r => r.id === row.id ? { ...r, status: next } : r))
+      setRows(rs => rs.map(r => r.id === row.id
+        ? { ...r, status: next, ...(isApprover ? { approval_status: 'approved' as ApprovalStatus } : {}) }
+        : r
+      ))
       toast.success(next === 'published' ? 'Published' : 'Unpublished')
     } else toast.error('Update failed')
   }
