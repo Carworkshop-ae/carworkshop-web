@@ -24,7 +24,7 @@ export function BlogPreview({ posts, title = 'Car Care Tips & News' }: BlogPrevi
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
           {posts.slice(0, 3).map(post => {
-            const image = post.image_webp_url || post.image_png_url || post.featured_image
+            const image = post.image_webp_url || post.featured_image
             return (
             <article key={post.id} className="group card-premium overflow-hidden flex flex-col">
               <Link href={`/blog/${post.slug}`} className="relative h-48 bg-[#EEF1F5] block overflow-hidden">

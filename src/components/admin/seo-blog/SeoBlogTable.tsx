@@ -9,7 +9,6 @@ import { DataTable } from '@/components/admin/DataTable'
 import { ConfirmModal } from '@/components/admin/ConfirmModal'
 import { ApprovalBadge } from '@/components/admin/ui/ApprovalBadge'
 import { AssigneePill } from '@/components/admin/ui/AssigneePill'
-import { COUNTRIES, countryFlag } from '@/lib/geo'
 import { APPROVAL_STATUS_LABELS, type ApprovalStatus } from '@/types'
 
 export interface SeoBlogRow extends Record<string, unknown> {
@@ -23,9 +22,6 @@ export interface SeoBlogRow extends Record<string, unknown> {
   approval_status: ApprovalStatus
   assignee_id: string | null
   assigned_at: string | null
-  country: string
-  state: string | null
-  image_png_url: string | null
   image_webp_url: string | null
   is_featured: boolean
   updated_at: string
@@ -49,13 +45,11 @@ export function SeoBlogTable({ initialRows, isApprover }: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [busy, setBusy] = useState(false)
 
-  const [fCountry, setFCountry] = useState('')
   const [fName, setFName] = useState('')
   const [fApproval, setFApproval] = useState('')
-  const [applied, setApplied] = useState({ country: '', name: '', approval: '' })
+  const [applied, setApplied] = useState({ name: '', approval: '' })
 
   const filtered = useMemo(() => rows.filter(r => {
-    if (applied.country && r.country !== applied.country) return false
     if (applied.name && !r.title.toLowerCase().includes(applied.name.toLowerCase())) return false
     if (applied.approval && r.approval_status !== applied.approval) return false
     return true
@@ -99,19 +93,15 @@ export function SeoBlogTable({ initialRows, isApprover }: Props) {
   return (
     <div className="space-y-4">
       <div className="bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg p-3 flex flex-wrap items-center gap-2">
-        <select value={fCountry} onChange={e => setFCountry(e.target.value)} className={FILTER_INPUT} aria-label="Country">
-          <option value="">Select Country</option>
-          {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-        </select>
         <input value={fName} onChange={e => setFName(e.target.value)} placeholder="Blog Title" className={FILTER_INPUT} />
         <select value={fApproval} onChange={e => setFApproval(e.target.value)} className={FILTER_INPUT} aria-label="Approval Status">
           <option value="">Approval Status</option>
           {(Object.keys(APPROVAL_STATUS_LABELS) as ApprovalStatus[]).map(s => <option key={s} value={s}>{APPROVAL_STATUS_LABELS[s]}</option>)}
         </select>
-        <button type="button" onClick={() => { setApplied({ country: fCountry, name: fName, approval: fApproval }); setPage(1) }} className="h-9 inline-flex items-center gap-1.5 rounded bg-[#22C55E] text-white text-sm font-semibold px-3 hover:bg-[#16A34A]">
+        <button type="button" onClick={() => { setApplied({ name: fName, approval: fApproval }); setPage(1) }} className="h-9 inline-flex items-center gap-1.5 rounded bg-[#22C55E] text-white text-sm font-semibold px-3 hover:bg-[#16A34A]">
           <Search size={15} /> Search
         </button>
-        <button type="button" onClick={() => { setFCountry(''); setFName(''); setFApproval(''); setApplied({ country: '', name: '', approval: '' }); setPage(1) }} aria-label="Reset" className="h-9 w-9 inline-flex items-center justify-center rounded bg-[#22C55E] text-white hover:bg-[#16A34A]">
+        <button type="button" onClick={() => { setFName(''); setFApproval(''); setApplied({ name: '', approval: '' }); setPage(1) }} aria-label="Reset" className="h-9 w-9 inline-flex items-center justify-center rounded bg-[#22C55E] text-white hover:bg-[#16A34A]">
           <RotateCcw size={15} />
         </button>
       </div>
@@ -151,18 +141,11 @@ export function SeoBlogTable({ initialRows, isApprover }: Props) {
       <div className="bg-white border border-[#E5E7EB] rounded-lg overflow-hidden">
         <DataTable<SeoBlogRow>
           columns={[
-            { key: 'country', header: 'Country', render: r => <span className="text-lg">{countryFlag(r.country)}</span> },
-            { key: 'state', header: 'State', render: r => <span className="text-xs">{r.state ?? '—'}</span> },
             { key: 'title', header: 'Blog Title', render: r => <span className="font-semibold text-[#1F2937] text-xs">{r.title}</span>, className: 'min-w-[180px]' },
             { key: 'slug', header: 'Slug URL', render: r => <span className="text-xs text-[#4472C4]">{r.slug}</span>, className: 'min-w-[140px]' },
             { key: 'seo_title', header: 'Meta Title', render: r => <span className="text-xs">{r.seo_title ?? '—'}</span>, className: 'min-w-[140px]' },
             { key: 'seo_description', header: 'Meta Desc', render: r => <span className="text-xs">{r.seo_description ?? '—'}</span>, className: 'min-w-[160px]' },
             { key: 'meta_keyword', header: 'Meta Keyword', render: r => <span className="text-xs">{r.meta_keyword ?? '—'}</span>, className: 'min-w-[140px]' },
-            {
-              key: 'png', header: 'PNG IMAGE', render: r => r.image_png_url
-                ? <a href={r.image_png_url} target="_blank" rel="noreferrer" className="text-[#EF4444]" aria-label="PNG"><ImageIcon size={18} /></a>
-                : <span className="text-[#D1D5DB]"><ImageIcon size={18} /></span>,
-            },
             {
               key: 'webp', header: 'WEBP IMAGE', render: r => r.image_webp_url
                 ? <a href={r.image_webp_url} target="_blank" rel="noreferrer" className="text-[#EF4444]" aria-label="WEBP"><ImageIcon size={18} /></a>

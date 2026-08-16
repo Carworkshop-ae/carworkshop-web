@@ -19,7 +19,6 @@ export interface SeoPageFormValues {
   state: string
   template_type: TemplateTypeValue
   h1: string
-  arabic_title: string
   slug: string
   meta_title: string
   meta_keyword: string
@@ -36,7 +35,7 @@ export interface SeoPageFormValues {
 }
 
 export const EMPTY_SEO_PAGE: SeoPageFormValues = {
-  country: 'AE', state: '', template_type: 'general_service', h1: '', arabic_title: '', slug: '',
+  country: 'AE', state: '', template_type: 'general_service', h1: '', slug: '',
   meta_title: '', meta_keyword: '', meta_description: '',
   brand_id: '', model_id: '', starting_price: '', short_description: '', complete_description: '',
   status: 'draft', display_in_footer: false, priority: null,
@@ -151,7 +150,6 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
       state: v.state || null,
       template_type: v.template_type,
       h1: v.h1,
-      arabic_title: v.arabic_title || null,
       slug: v.slug,
       meta_title: v.meta_title,
       meta_keyword: v.meta_keyword || null,
@@ -246,10 +244,7 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AdminInput label="Title (H1)" required value={v.h1} onChange={e => set('h1', e.target.value)} />
-          <AdminInput label="Arabic Title" dir="rtl" value={v.arabic_title} onChange={e => set('arabic_title', e.target.value)} />
-        </div>
+        <AdminInput label="Title (H1)" required value={v.h1} onChange={e => set('h1', e.target.value)} />
         <AdminInput label="Starting Price" hint='Shown in the hero stat card, e.g. "From AED 149"' value={v.starting_price} onChange={e => set('starting_price', e.target.value)} maxCount={60} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AdminInput label="URL" required value={`${siteUrl}/`} disabled readOnly />

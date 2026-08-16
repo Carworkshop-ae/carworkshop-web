@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const service = createServiceClient()
     let query = service
       .from('blog_posts')
-      .select('id, title, slug, seo_title, seo_description, meta_keyword, status, approval_status, assignee_id, assigned_at, country, state, image_png_url, image_webp_url, is_featured, published_at, updated_at')
+      .select('id, title, slug, seo_title, seo_description, meta_keyword, status, approval_status, assignee_id, assigned_at, image_webp_url, is_featured, published_at, updated_at')
       .order('updated_at', { ascending: false })
 
     if (sp.get('name')) query = query.ilike('title', `%${sp.get('name')!}%`)
@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
         ...d,
         status: statusForRoleOnSave(acting.role, d.status),
         content: d.content ? sanitizeHTML(d.content) : null,
-        arabic_content: d.arabic_content ? sanitizeHTML(d.arabic_content) : null,
         approval_status: nextStatusOnSave(acting.role),
         author_id: acting.id,
       })

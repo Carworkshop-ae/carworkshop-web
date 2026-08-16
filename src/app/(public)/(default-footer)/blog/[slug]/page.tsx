@@ -16,7 +16,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createPublicSupabase()
-  const { data: post } = await supabase.from('blog_posts').select('title, excerpt, seo_title, seo_description, featured_image, image_webp_url, image_png_url, seo_json').eq('slug', slug).eq('status', 'published').single()
+  const { data: post } = await supabase.from('blog_posts').select('title, excerpt, seo_title, seo_description, featured_image, image_webp_url, seo_json').eq('slug', slug).eq('status', 'published').single()
 
   if (!post) return { title: 'Post Not Found' }
 
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: post.seo_title ?? `${post.title} | CarWorkshop.ae`,
     description: post.seo_description ?? post.excerpt ?? '',
     url,
-    ogImage: post.image_webp_url || post.image_png_url || post.featured_image,
+    ogImage: post.image_webp_url || post.featured_image,
   })
   const meta = seoToMetadata(seo, url)
   return { ...meta, openGraph: { ...meta.openGraph, type: 'article' } }
@@ -50,8 +50,8 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   if (!post) notFound()
 
-  const featuredImage = post.image_webp_url || post.image_png_url || post.featured_image
-  const featuredImageAlt = post.image_alt || post.image_title || post.title
+  const featuredImage = post.image_webp_url || post.featured_image
+  const featuredImageAlt = post.image_alt || post.title
 
   let authorName = settings.default_author_name || 'CarWorkshop Team'
   if (post.author_id) {

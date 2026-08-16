@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid data', details: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
 
-    const { complete_description, short_description, arabic_short_description, arabic_complete_description, content_json, ...rest } = parsed.data
+    const { complete_description, short_description, content_json, ...rest } = parsed.data
 
     const incoming = (content_json ?? {}) as PageContent
     const merged: PageContent = { ...incoming }
@@ -72,8 +72,6 @@ export async function POST(req: NextRequest) {
         priority: priorityForRoleOnSave(acting.role, rest.priority),
         meta_description: rest.meta_description ?? '',
         short_description: short_description ? stripHTML(short_description) : null,
-        arabic_short_description: arabic_short_description ? sanitizeHTML(arabic_short_description) : null,
-        arabic_complete_description: arabic_complete_description ? sanitizeHTML(arabic_complete_description) : null,
         content_json: Object.keys(merged).length > 0 ? (merged as unknown as Json) : null,
         approval_status: nextStatusOnSave(acting.role),
         created_by: acting.id,

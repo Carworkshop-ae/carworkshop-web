@@ -23,7 +23,6 @@ export default async function EditSeoPagePage({ params }: { params: Promise<{ id
     state: page.state ?? '',
     template_type: page.template_type,
     h1: page.h1,
-    arabic_title: page.arabic_title ?? '',
     slug: page.slug,
     meta_title: page.meta_title,
     meta_keyword: page.meta_keyword ?? '',

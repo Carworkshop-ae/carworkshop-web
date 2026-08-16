@@ -14,7 +14,6 @@ export const SeoPageUpdateSchema = z.object({
   state: z.string().max(60).nullable().optional(),
   template_type: z.enum(TEMPLATE_TYPES).optional(),
   h1: z.string().min(1).max(300).optional(),
-  arabic_title: z.string().max(300).nullable().optional(),
   slug: z.string().min(1).max(300).regex(/^[a-z0-9/-]+$/, 'Lowercase letters, numbers, hyphens and slashes only').optional(),
   meta_title: z.string().min(1).max(100).optional(),
   meta_keyword: z.string().max(500).nullable().optional(),
@@ -23,8 +22,6 @@ export const SeoPageUpdateSchema = z.object({
   model_id: z.string().uuid().nullable().optional(),
   starting_price: z.string().max(60).nullable().optional(),
   short_description: z.string().max(500).nullable().optional(),
-  arabic_short_description: z.string().max(50000).nullable().optional(),
-  arabic_complete_description: z.string().max(100000).nullable().optional(),
   // "Complete Description" maps onto content_json.main_content downstream.
   complete_description: z.string().max(100000).nullable().optional(),
   status: z.enum(['draft', 'published', 'archived']).optional(),

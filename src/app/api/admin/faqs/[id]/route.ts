@@ -43,7 +43,6 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       .update({
         ...d,
         ...(d.description_html !== undefined ? { description_html: sanitizeHTML(d.description_html) } : {}),
-        ...(d.arabic_description_html !== undefined ? { arabic_description_html: sanitizeHTML(d.arabic_description_html) } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)

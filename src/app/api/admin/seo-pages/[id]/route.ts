@@ -38,7 +38,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Invalid data', details: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
 
-    const { complete_description, short_description, arabic_short_description, arabic_complete_description, content_json, ...rest } = parsed.data
+    const { complete_description, short_description, content_json, ...rest } = parsed.data
 
     const service = createServiceClient()
 
@@ -72,8 +72,6 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         ...statusUpdate,
         ...priorityUpdate,
         ...(short_description !== undefined ? { short_description: short_description ? stripHTML(short_description) : null } : {}),
-        ...(arabic_short_description !== undefined ? { arabic_short_description: arabic_short_description ? sanitizeHTML(arabic_short_description) : null } : {}),
-        ...(arabic_complete_description !== undefined ? { arabic_complete_description: arabic_complete_description ? sanitizeHTML(arabic_complete_description) : null } : {}),
         ...contentUpdate,
         approval_status: nextStatusOnSave(acting.role),
         updated_at: new Date().toISOString(),
