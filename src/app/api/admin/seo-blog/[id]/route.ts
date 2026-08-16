@@ -53,7 +53,6 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         ...d,
         ...statusUpdate,
         ...(d.content !== undefined ? { content: d.content ? sanitizeHTML(d.content) : null } : {}),
-        ...(d.arabic_content !== undefined ? { arabic_content: d.arabic_content ? sanitizeHTML(d.arabic_content) : null } : {}),
         approval_status: nextStatusOnSave(acting.role),
         updated_at: new Date().toISOString(),
       })

@@ -69,9 +69,7 @@ export function FaqTable({ initialRows }: Props) {
       body: JSON.stringify({
         country: row.country,
         name: `${row.name} (copy)`,
-        arabic_name: row.arabic_name,
         description_html: row.description_html,
-        arabic_description_html: row.arabic_description_html,
         display_order: row.display_order + 1,
         is_active: false,
       }),
@@ -123,7 +121,6 @@ export function FaqTable({ initialRows }: Props) {
               <th className="w-10 px-4 py-3" />
               <th className="px-4 py-3 text-left font-semibold text-white">Country</th>
               <th className="px-4 py-3 text-left font-semibold text-white">Name</th>
-              <th className="px-4 py-3 text-right font-semibold text-white">Name (AR)</th>
               <th className="px-4 py-3 text-left font-semibold text-white">Display Order</th>
               <th className="px-4 py-3 text-left font-semibold text-white">Publish</th>
               <th className="px-4 py-3 text-left font-semibold text-white">Edit</th>
@@ -144,7 +141,6 @@ export function FaqTable({ initialRows }: Props) {
                     </td>
                     <td className="px-4 py-3 text-lg">{countryFlag(row.country)}</td>
                     <td className="px-4 py-3 font-semibold text-[#1F2937] text-xs">{row.name}</td>
-                    <td className="px-4 py-3 text-right text-xs" dir="rtl">{row.arabic_name ?? '—'}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-2 text-xs font-bold">
                         {row.display_order}

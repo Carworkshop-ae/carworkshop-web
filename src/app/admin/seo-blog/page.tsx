@@ -14,7 +14,7 @@ export default async function SeoBlogPage() {
   const [{ data: posts }, { data: users }] = await Promise.all([
     service
       .from('blog_posts')
-      .select('id, title, slug, seo_title, seo_description, meta_keyword, status, approval_status, assignee_id, assigned_at, country, state, image_png_url, image_webp_url, is_featured, updated_at')
+      .select('id, title, slug, seo_title, seo_description, meta_keyword, status, approval_status, assignee_id, assigned_at, image_webp_url, is_featured, updated_at')
       .order('updated_at', { ascending: false })
       .limit(1000),
     service.from('users').select('id, full_name'),

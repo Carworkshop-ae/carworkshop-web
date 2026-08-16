@@ -15,9 +15,7 @@ export default async function EditFaqPage({ params }: { params: Promise<{ id: st
   const initial: FaqFormValues = {
     country: faq.country,
     name: faq.name,
-    arabic_name: faq.arabic_name ?? '',
     description_html: faq.description_html,
-    arabic_description_html: faq.arabic_description_html,
     display_order: faq.display_order,
     is_active: faq.is_active,
   }

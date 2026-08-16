@@ -109,109 +109,88 @@ export type Database = {
       blog_posts: {
         Row: {
           approval_status: Database["public"]["Enums"]["approval_status"]
-          arabic_blockquote: string | null
-          arabic_content: string | null
-          arabic_excerpt: string | null
-          arabic_title: string | null
           assigned_at: string | null
           assignee_id: string | null
           author_id: string | null
           blockquote: string | null
+          brand_id: string | null
           category_id: string | null
           content: string | null
-          country: string
           created_at: string
           excerpt: string | null
           featured_image: string | null
           id: string
           image_alt: string | null
-          image_png_url: string | null
-          image_title: string | null
           image_webp_url: string | null
           is_featured: boolean
           meta_keyword: string | null
+          model_id: string | null
           published_at: string | null
           scheduled_at: string | null
           seo_description: string | null
           seo_json: Json
           seo_title: string | null
           slug: string
-          state: string | null
           status: Database["public"]["Enums"]["content_status"]
           tags: string | null
-          tags_ar: string | null
           title: string
           updated_at: string
         }
         Insert: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
-          arabic_blockquote?: string | null
-          arabic_content?: string | null
-          arabic_excerpt?: string | null
-          arabic_title?: string | null
           assigned_at?: string | null
           assignee_id?: string | null
           author_id?: string | null
           blockquote?: string | null
+          brand_id?: string | null
           category_id?: string | null
           content?: string | null
-          country?: string
           created_at?: string
           excerpt?: string | null
           featured_image?: string | null
           id?: string
           image_alt?: string | null
-          image_png_url?: string | null
-          image_title?: string | null
           image_webp_url?: string | null
           is_featured?: boolean
           meta_keyword?: string | null
+          model_id?: string | null
           published_at?: string | null
           scheduled_at?: string | null
           seo_description?: string | null
           seo_json?: Json
           seo_title?: string | null
           slug: string
-          state?: string | null
           status?: Database["public"]["Enums"]["content_status"]
           tags?: string | null
-          tags_ar?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
-          arabic_blockquote?: string | null
-          arabic_content?: string | null
-          arabic_excerpt?: string | null
-          arabic_title?: string | null
           assigned_at?: string | null
           assignee_id?: string | null
           author_id?: string | null
           blockquote?: string | null
+          brand_id?: string | null
           category_id?: string | null
           content?: string | null
-          country?: string
           created_at?: string
           excerpt?: string | null
           featured_image?: string | null
           id?: string
           image_alt?: string | null
-          image_png_url?: string | null
-          image_title?: string | null
           image_webp_url?: string | null
           is_featured?: boolean
           meta_keyword?: string | null
+          model_id?: string | null
           published_at?: string | null
           scheduled_at?: string | null
           seo_description?: string | null
           seo_json?: Json
           seo_title?: string | null
           slug?: string
-          state?: string | null
           status?: Database["public"]["Enums"]["content_status"]
           tags?: string | null
-          tags_ar?: string | null
           title?: string
           updated_at?: string
         }
@@ -235,6 +214,20 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "brand_models"
             referencedColumns: ["id"]
           },
         ]
@@ -497,8 +490,6 @@ export type Database = {
       }
       faqs: {
         Row: {
-          arabic_description_html: string
-          arabic_name: string | null
           country: string
           created_at: string
           description_html: string
@@ -509,8 +500,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          arabic_description_html?: string
-          arabic_name?: string | null
           country?: string
           created_at?: string
           description_html?: string
@@ -521,8 +510,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          arabic_description_html?: string
-          arabic_name?: string | null
           country?: string
           created_at?: string
           description_html?: string
@@ -626,9 +613,6 @@ export type Database = {
       generated_pages: {
         Row: {
           approval_status: Database["public"]["Enums"]["approval_status"]
-          arabic_complete_description: string | null
-          arabic_short_description: string | null
-          arabic_title: string | null
           assigned_at: string | null
           assignee_id: string | null
           brand_id: string | null
@@ -655,9 +639,6 @@ export type Database = {
         }
         Insert: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
-          arabic_complete_description?: string | null
-          arabic_short_description?: string | null
-          arabic_title?: string | null
           assigned_at?: string | null
           assignee_id?: string | null
           brand_id?: string | null
@@ -684,9 +665,6 @@ export type Database = {
         }
         Update: {
           approval_status?: Database["public"]["Enums"]["approval_status"]
-          arabic_complete_description?: string | null
-          arabic_short_description?: string | null
-          arabic_title?: string | null
           assigned_at?: string | null
           assignee_id?: string | null
           brand_id?: string | null
@@ -751,7 +729,6 @@ export type Database = {
           key_name: string
           slug: string
           updated_at: string
-          value_ar: string
           value_en: string
         }
         Insert: {
@@ -762,7 +739,6 @@ export type Database = {
           key_name: string
           slug: string
           updated_at?: string
-          value_ar?: string
           value_en?: string
         }
         Update: {
@@ -773,7 +749,6 @@ export type Database = {
           key_name?: string
           slug?: string
           updated_at?: string
-          value_ar?: string
           value_en?: string
         }
         Relationships: []

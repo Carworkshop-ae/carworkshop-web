@@ -46,9 +46,9 @@ export function LanguageKeyManager({ initialRows }: Props) {
     const res = await fetch('/api/admin/language-keys/generate-file', { method: 'POST' })
     setBusy(false)
     if (!res.ok) { toast.error('Generate failed'); return }
-    const d = await res.json() as { count: number; en: Record<string, string>; ar: Record<string, string> }
-    // Offer the generated bundles as a download.
-    const blob = new Blob([JSON.stringify({ en: d.en, ar: d.ar }, null, 2)], { type: 'application/json' })
+    const d = await res.json() as { count: number; en: Record<string, string> }
+    // Offer the generated bundle as a download.
+    const blob = new Blob([JSON.stringify({ en: d.en }, null, 2)], { type: 'application/json' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = 'language-keys.json'
@@ -84,7 +84,6 @@ export function LanguageKeyManager({ initialRows }: Props) {
             <tr style={{ backgroundColor: '#1F2937' }}>
               <th className="px-4 py-3 text-left font-semibold text-white">Key Name</th>
               <th className="px-4 py-3 text-left font-semibold text-white">English Value</th>
-              <th className="px-4 py-3 text-left font-semibold text-white">Arabic Value</th>
               <th className="px-4 py-3 text-left font-semibold text-white">Publish</th>
               <th className="px-4 py-3 text-left font-semibold text-white">Edit</th>
             </tr>
@@ -97,7 +96,6 @@ export function LanguageKeyManager({ initialRows }: Props) {
                   <span className="block text-[10px] text-[#9CA3AF]">[{row.slug}]</span>
                 </td>
                 <td className="px-4 py-3 text-xs min-w-[180px]">{row.value_en}</td>
-                <td className="px-4 py-3 text-xs min-w-[180px]" dir="rtl">{row.value_ar}</td>
                 <td className="px-4 py-3"><PillToggle value={row.is_published} onChange={() => void togglePublish(row)} /></td>
                 <td className="px-4 py-3">
                   <button type="button" aria-label="Edit" onClick={() => setEditing(row)} className="h-7 w-7 inline-flex items-center justify-center rounded bg-[#22C55E] text-white hover:bg-[#16A34A]"><Pencil size={13} /></button>
@@ -105,7 +103,7 @@ export function LanguageKeyManager({ initialRows }: Props) {
               </tr>
             ))}
             {pageRows.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-[#9CA3AF]">No language keys found</td></tr>
+              <tr><td colSpan={4} className="px-4 py-10 text-center text-[#9CA3AF]">No language keys found</td></tr>
             )}
           </tbody>
         </table>
@@ -133,7 +131,6 @@ function LanguageKeyModal({ row, onClose, onSaved }: { row: LanguageKey | null; 
   const [keyName, setKeyName] = useState(row?.key_name ?? '')
   const [slug, setSlug] = useState(row?.slug ?? '')
   const [en, setEn] = useState(row?.value_en ?? '')
-  const [ar, setAr] = useState(row?.value_ar ?? '')
   const [comment, setComment] = useState(row?.comment ?? '')
   const [saving, setSaving] = useState(false)
 
@@ -143,7 +140,7 @@ function LanguageKeyModal({ row, onClose, onSaved }: { row: LanguageKey | null; 
     const res = await fetch(row ? `/api/admin/language-keys/${row.id}` : '/api/admin/language-keys', {
       method: row ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key_name: keyName, slug, value_en: en, value_ar: ar, comment: comment || null }),
+      body: JSON.stringify({ key_name: keyName, slug, value_en: en, comment: comment || null }),
     })
     setSaving(false)
     if (!res.ok) {
@@ -165,7 +162,6 @@ function LanguageKeyModal({ row, onClose, onSaved }: { row: LanguageKey | null; 
         <div className="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
           <AdminInput label="Full text" value={keyName} onChange={e => setKeyName(e.target.value)} readOnly={!!row} disabled={!!row} />
           <AdminInput label="key_slug" value={slug} onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))} readOnly={!!row} disabled={!!row} />
-          <AdminTextarea label="Arabic" dir="rtl" value={ar} onChange={e => setAr(e.target.value)} rows={3} />
           <AdminTextarea label="English" value={en} onChange={e => setEn(e.target.value)} rows={3} />
           <AdminTextarea label="Comment" value={comment} onChange={e => setComment(e.target.value)} rows={2} />
         </div>

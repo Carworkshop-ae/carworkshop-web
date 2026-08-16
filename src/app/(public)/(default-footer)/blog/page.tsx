@@ -55,7 +55,7 @@ export default async function BlogPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map(post => {
-              const image = post.image_webp_url || post.image_png_url || post.featured_image
+              const image = post.image_webp_url || post.featured_image
               return (
               <Card key={post.id} padding="none" hover className="overflow-hidden flex flex-col">
                 {image && (

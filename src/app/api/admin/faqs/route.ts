@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
       .insert({
         ...d,
         description_html: sanitizeHTML(d.description_html),
-        arabic_description_html: sanitizeHTML(d.arabic_description_html),
       })
       .select('id')
       .single()
