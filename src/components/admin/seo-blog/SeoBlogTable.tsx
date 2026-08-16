@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { Search, RotateCcw, Plus, Trash2, ChevronDown, Pencil, Copy, Image as ImageIcon } from 'lucide-react'
 import { DataTable } from '@/components/admin/DataTable'
 import { ConfirmModal } from '@/components/admin/ConfirmModal'
+import { PillToggle } from '@/components/admin/ui/PillToggle'
 import { ApprovalBadge } from '@/components/admin/ui/ApprovalBadge'
 import { AssigneePill } from '@/components/admin/ui/AssigneePill'
 import { APPROVAL_STATUS_LABELS, type ApprovalStatus } from '@/types'
@@ -57,6 +58,22 @@ export function SeoBlogTable({ initialRows, isApprover }: Props) {
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize)
+
+  async function togglePublish(row: SeoBlogRow) {
+    const next = row.status === 'published' ? 'draft' : 'published'
+    const res = await fetch(`/api/admin/seo-blog/${row.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: next }),
+    })
+    if (res.ok) {
+      setRows(rs => rs.map(r => r.id === row.id
+        ? { ...r, status: next, ...(isApprover ? { approval_status: 'approved' as ApprovalStatus } : {}) }
+        : r
+      ))
+      toast.success(next === 'published' ? 'Published' : 'Unpublished')
+    } else toast.error('Update failed')
+  }
 
   async function bulkApproval(action: 'approve' | 'reject' | 'resubmission_required') {
     if (selected.length === 0) { toast.error('Select rows first'); return }
@@ -159,9 +176,7 @@ export function SeoBlogTable({ initialRows, isApprover }: Props) {
             },
             {
               key: 'status', header: 'Publish', render: r => (
-                <span className={`text-xs font-semibold ${r.status === 'published' ? 'text-[#22C55E]' : 'text-[#6B7280]'}`}>
-                  {r.status === 'published' ? 'Active' : 'Inactive'}
-                </span>
+                <PillToggle value={r.status === 'published'} onChange={() => void togglePublish(r)} onLabel="YES" offLabel="NO" />
               ),
             },
             {
