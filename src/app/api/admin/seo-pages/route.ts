@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getActingUser } from '@/lib/auth-guard'
-import { sanitizeHTML, stripHTML } from '@/lib/sanitize'
+import { stripHTML } from '@/lib/sanitize'
 import { logAudit } from '@/lib/audit'
 import { revalidateGeneratedPage } from '@/lib/revalidate'
 import { nextStatusOnSave, statusForRoleOnSave, priorityForRoleOnSave } from '@/lib/approval'
@@ -57,11 +57,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid data', details: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
 
-    const { complete_description, short_description, content_json, ...rest } = parsed.data
+    const { short_description, content_json, ...rest } = parsed.data
 
-    const incoming = (content_json ?? {}) as PageContent
-    const merged: PageContent = { ...incoming }
-    if (complete_description) merged.main_content = sanitizeHTML(complete_description)
+    const merged: PageContent = { ...(content_json ?? {}) as PageContent }
 
     const service = createServiceClient()
     const { data, error } = await service

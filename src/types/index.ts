@@ -59,12 +59,10 @@ export interface TrustStat {
   label: string
 }
 
-// Editable overlay stored in generated_pages.content_json. Long description
-// ("Complete Description" in the admin form) lands in main_content; every
-// other section (services, why-choose-us, CTA, other-services, locations)
-// is assembled at render time, not authored per-page.
+// Editable overlay stored in generated_pages.content_json. Every section
+// (services, why-choose-us, CTA, other-services, locations) is assembled
+// at render time, not authored per-page.
 export interface PageContent {
-  main_content?: string | null
   faqs?: Array<{ q: string; a: string }>
   /** Editable H2 above the auto-assembled services grid. Defaults to "Our Services". */
   services_heading?: string | null

@@ -22,8 +22,6 @@ export const SeoPageUpdateSchema = z.object({
   model_id: z.string().uuid().nullable().optional(),
   starting_price: z.string().max(60).nullable().optional(),
   short_description: z.string().max(500).nullable().optional(),
-  // "Complete Description" maps onto content_json.main_content downstream.
-  complete_description: z.string().max(100000).nullable().optional(),
   status: z.enum(['draft', 'published', 'archived']).optional(),
   display_in_footer: z.boolean().optional(),
   priority: z.number().int().min(1).max(8).nullable().optional(),
