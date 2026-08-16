@@ -54,6 +54,8 @@ const TEMPLATES: Array<{ value: TemplateTypeValue; label: string }> = [
   { value: 'brand_model', label: 'Brand Model Template' },
   { value: 'brand_model_service', label: 'Brand Model Service Template' },
   { value: 'general_service', label: 'General Service Template' },
+  { value: 'garage_brand', label: 'Garage Brand Template' },
+  { value: 'garage_car', label: 'Garage Car Template' },
 ]
 
 type SlugStatus = 'idle' | 'checking' | 'available' | 'taken'
@@ -104,14 +106,16 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
     const stateSlug = v.state ? generateSlug(v.state) : ''
     const brandName = brands.find(b => b.id === v.brand_id)?.name
     const modelName = models.find(m => m.id === v.model_id)?.name
+    const isGarage = v.template_type === 'garage_brand' || v.template_type === 'garage_car'
     const parts = [stateSlug]
+    if (isGarage) parts.push('garage')
     if (requiresBrand && brandName) parts.push(generateSlug(brandName))
     if (requiresModel && modelName) parts.push(generateSlug(modelName))
     const nextSlug = parts.filter(Boolean).join('/')
     queueMicrotask(() => { if (!cancelled) set('slug', nextSlug) })
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [v.state, v.brand_id, v.model_id, requiresBrand, requiresModel, slugEdited])
+  }, [v.state, v.brand_id, v.model_id, v.template_type, requiresBrand, requiresModel, slugEdited])
 
   // Debounced slug-availability check.
   useEffect(() => {

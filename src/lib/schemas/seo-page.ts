@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
-export const TEMPLATE_TYPES = ['brand', 'brand_service', 'brand_model', 'brand_model_service', 'general_service'] as const
+export const TEMPLATE_TYPES = ['brand', 'brand_service', 'brand_model', 'brand_model_service', 'general_service', 'garage_brand', 'garage_car'] as const
 export type TemplateTypeValue = (typeof TEMPLATE_TYPES)[number]
 
 // Templates that require a car make selection (all but general_service).
-export const TEMPLATES_REQUIRING_BRAND: TemplateTypeValue[] = ['brand', 'brand_service', 'brand_model', 'brand_model_service']
+export const TEMPLATES_REQUIRING_BRAND: TemplateTypeValue[] = ['brand', 'brand_service', 'brand_model', 'brand_model_service', 'garage_brand', 'garage_car']
 // Templates that require a car model selection (page blocked without one).
-export const TEMPLATES_REQUIRING_MODEL: TemplateTypeValue[] = ['brand_model', 'brand_model_service']
+export const TEMPLATES_REQUIRING_MODEL: TemplateTypeValue[] = ['brand_model', 'brand_model_service', 'garage_car']
 
-// SEO Page editor payload (generated_pages) — 5-template system.
+// SEO Page editor payload (generated_pages) — 7-template system.
 export const SeoPageUpdateSchema = z.object({
   country: z.string().length(2).optional(),
   state: z.string().max(60).nullable().optional(),

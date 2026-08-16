@@ -1195,6 +1195,8 @@ export type Database = {
         | "brand_model"
         | "brand_model_service"
         | "general_service"
+        | "garage_brand"
+        | "garage_car"
       user_role:
         | "super_admin"
         | "admin"
@@ -1351,6 +1353,8 @@ export const Constants = {
         "brand_model",
         "brand_model_service",
         "general_service",
+        "garage_brand",
+        "garage_car",
       ],
       user_role: [
         "super_admin",
