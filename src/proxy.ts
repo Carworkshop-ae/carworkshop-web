@@ -38,14 +38,15 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL('/admin', req.url))
   }
 
-  // Role restriction: seo_editor may reach ONLY the 5 SEO modules (allowlist,
+  // Role restriction: seo_editor may reach ONLY the SEO modules below (allowlist,
   // not blocklist) — everything else under /admin including the dashboard itself
   // is denied. /admin/pages/static is the Static Page SEO editor (separate from
   // the /admin/static-page-seo list view) and must stay allowed alongside it.
+  // /admin/brands lets SEO editors add car makes/models used by the SEO editors.
   if (user && !isLoginPath) {
     const { data: u } = await supabase.from('users').select('role').eq('id', user.id).maybeSingle()
     if (u?.role === 'seo_editor') {
-      const allowedPages = ['/admin/seo-pages', '/admin/seo-blog', '/admin/service-content', '/admin/static-page-seo', '/admin/pages/static', '/admin/search-content']
+      const allowedPages = ['/admin/seo-pages', '/admin/seo-blog', '/admin/service-content', '/admin/static-page-seo', '/admin/pages/static', '/admin/search-content', '/admin/brands']
       const allowedApi = ['/api/admin/seo-pages', '/api/admin/seo-blog', '/api/admin/service-content', '/api/admin/static-page-seo', '/api/admin/pages/static', '/api/admin/search-content', '/api/admin/media', '/api/admin/me', '/api/admin/logout', '/api/admin/brands']
 
       if (pathname.startsWith('/api/admin/')) {
