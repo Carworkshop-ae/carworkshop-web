@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { AdminSectionCard } from '@/components/admin/ui/AdminSectionCard'
 import { AdminInput, AdminTextarea, AdminSelect, AdminLabel } from '@/components/admin/ui/AdminField'
 import { AdminButton } from '@/components/admin/ui/AdminButton'
+import { RichTextEditor } from '@/components/admin/RichTextEditor'
 import { SERVICE_ICONS } from '@/lib/service-icons'
 import { COUNTRIES, STATES_BY_COUNTRY } from '@/lib/geo'
 import { generateSlug } from '@/lib/page-engine/slugify'
@@ -26,6 +27,7 @@ export interface SeoPageFormValues {
   model_id: string
   starting_price: string
   short_description: string
+  complete_description: string
   status: string
   display_in_footer: boolean
   priority: number | null
@@ -35,7 +37,7 @@ export interface SeoPageFormValues {
 export const EMPTY_SEO_PAGE: SeoPageFormValues = {
   country: 'AE', state: '', template_type: 'general_service', h1: '', slug: '',
   meta_title: '', meta_keyword: '', meta_description: '',
-  brand_id: '', model_id: '', starting_price: '', short_description: '',
+  brand_id: '', model_id: '', starting_price: '', short_description: '', complete_description: '',
   status: 'draft', display_in_footer: false, priority: null,
   content_json: {},
 }
@@ -156,6 +158,7 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
       model_id: requiresModel ? (v.model_id || null) : null,
       starting_price: v.starting_price || null,
       short_description: v.short_description || null,
+      complete_description: v.complete_description || null,
       status: v.status,
       display_in_footer: v.display_in_footer,
       priority: v.template_type === 'general_service' ? v.priority : null,
@@ -277,6 +280,10 @@ export function SeoPageForm({ pageId, initial, brands }: Props) {
             onChange={e => setContent('services_heading', e.target.value)}
           />
         )}
+        <div>
+          <AdminLabel>Long Description</AdminLabel>
+          <RichTextEditor value={v.complete_description} onChange={html => set('complete_description', html)} minHeight={260} />
+        </div>
       </AdminSectionCard>
 
       {/* Section 3: DISPLAY INFORMATION */}
