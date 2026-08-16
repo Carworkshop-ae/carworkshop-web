@@ -112,8 +112,10 @@ export default async function GeneratedPage({ params }: Props) {
   // main content, so it leads. brand_service/brand_model_service/general_service
   // pages ARE themselves one service — their own long description is the
   // primary content and should lead, with the Services grid demoted to a
-  // cross-sell section further down.
+  // cross-sell section further down. garage_brand/garage_car are landing
+  // pages like brand/brand_model, so the Services grid leads for those too.
   const servicesLeadFirst = page.template_type === 'brand' || page.template_type === 'brand_model' || page.template_type === 'brand_service'
+    || page.template_type === 'garage_brand' || page.template_type === 'garage_car'
 
   const servicesSection = <ServiceCards title={servicesHeading} links={sections.services} viewAllHref={viewAllHref} />
   const contentSection = page.content_json?.main_content && (

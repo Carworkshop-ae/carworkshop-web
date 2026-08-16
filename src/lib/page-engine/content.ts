@@ -274,6 +274,24 @@ export async function getRelatedSections(page: GeneratedPageRow, brandName: stri
       const locations = await findPublished({ template_type: 'general_service', excludeState: page.state })
       return { ...empty, locations: locations.map(r => ({ h1: r.h1, slug: r.slug })) }
     }
+    case 'garage_brand': {
+      // Same cross-sell cascade as 'brand' — garage pages target the same
+      // brand-level services, just under a "garage" keyword slug.
+      let services = await findPublished({ template_type: 'brand_service', brand_id: page.brand_id, sameState: page.state })
+      if (services.length === 0) services = await findPublished({ template_type: 'general_service', sameState: page.state })
+      const models = await findPublished({ template_type: 'brand_model', brand_id: page.brand_id, sameState: page.state })
+      const locations = await findPublished({ template_type: 'garage_brand', brand_id: page.brand_id, excludeState: page.state })
+      return { services: toLinks(services), models: toLinks(models), locations: toLocationLinks(locations) }
+    }
+    case 'garage_car': {
+      // Same cross-sell cascade as 'brand_model'.
+      let services = await findPublished({ template_type: 'brand_model_service', brand_id: page.brand_id, model_id: page.model_id, sameState: page.state })
+      if (services.length === 0) services = await findPublished({ template_type: 'brand_service', brand_id: page.brand_id, sameState: page.state })
+      if (services.length === 0) services = await findPublished({ template_type: 'general_service', sameState: page.state })
+      const models = (await findPublished({ template_type: 'garage_car', brand_id: page.brand_id, sameState: page.state })).filter(r => r.slug !== page.slug)
+      const locations = await findPublished({ template_type: 'garage_car', brand_id: page.brand_id, model_id: page.model_id, excludeState: page.state })
+      return { ...empty, services: toLinks(services), models: toLinks(models), locations: toLocationLinks(locations) }
+    }
     default:
       return empty
   }

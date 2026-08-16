@@ -39,7 +39,7 @@ export type UpdateBlogPost = Database['public']['Tables']['blog_posts']['Update'
 export type ContentStatus = 'draft' | 'published' | 'archived'
 export type LeadStatus = 'new' | 'contacted' | 'in_progress' | 'converted' | 'closed'
 export type UserRole = 'super_admin' | 'admin' | 'editor' | 'content_writer' | 'support_staff' | 'seo_editor'
-export type TemplateType = 'brand' | 'brand_service' | 'brand_model' | 'brand_model_service' | 'general_service'
+export type TemplateType = 'brand' | 'brand_service' | 'brand_model' | 'brand_model_service' | 'general_service' | 'garage_brand' | 'garage_car'
 export type ApprovalStatus = 'pending' | 'approved' | 'resubmission_required' | 'rejected'
 
 export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
